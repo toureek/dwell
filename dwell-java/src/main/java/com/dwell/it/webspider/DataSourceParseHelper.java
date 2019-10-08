@@ -106,4 +106,6 @@ public class DataSourceParseHelper {
         ArrayList<Object> houseArrayList = new ArrayList<>();   // HouseModel List
         // ToDO: 构造House Model并将其添加进列表
     }
+
+    
 }

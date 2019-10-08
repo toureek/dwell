@@ -45,7 +45,7 @@
   	```
 
   - 2.1.2 Setup Database connection in configuration file.    
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Locate the configuration file in project which named <b>application.properties</b> and setup the database connection including <b>driver, url, username, password, caches </b> for database.  After the basic configurations is seted up, Let's begin to code.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Locate the configuration file in project which named <b>application.properties</b> and setup the database connection including <b>driver, url, username, password, caches </b> for database.  After the basic configurations is seted up, Let's begin to program with mybatis.
 <p><p>
 	<figure class="third">
 		<img src="resource/2.1-01.png" width="400" height="400" align="left" /> 

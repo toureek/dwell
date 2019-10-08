@@ -19,16 +19,22 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compile('org.springframework.boot:spring-boot-starter-aop')
 
+	//	JSON-Handler
+	compile("com.google.code.gson:gson:2.8.5")
+	compile("edu.uci.ics:crawler4j:4.4.0")
+	compile("org.jsoup:jsoup:1.11.3")
+	compile("com.sleepycat:je:5.0.73")
+	compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.6.0'
+
 	//	Database
 	compile("com.mchange:c3p0:0.9.5.2")
 	runtimeOnly 'mysql:mysql-connector-java'
 
-	//	Unit Test
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'junit:junit'
-
-
 	//	Getters / Setters Utils
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	//	Unit Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'junit:junit'
 }

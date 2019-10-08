@@ -59,6 +59,13 @@
         <result column="gas_supported" property="gasSupported" jdbcType="VARCHAR" />
     </resultMap>
 
+
+    <sql id="House_ListPage_Column_List" >
+        id, provider_id, title, detail_page_url, area, aspect, living_dining_kitchen_info, stock_count, main_image_url,
+        city_zone, info_tags, last_update_time, trade_price, trade_price_unit
+    </sql>
+
+
     <insert id="insertNewHouseObject" useGeneratedKeys="true" keyProperty="id"
             keyColumn="id" parameterType="com.dwell.it.entities.HouseDetail">
         insert into t_houses

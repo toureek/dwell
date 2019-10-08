@@ -2,6 +2,8 @@ package com.dwell.it.webspider;
 
 import com.dwell.it.entities.House;
 import com.dwell.it.model.ModelFactory;
+import com.dwell.it.utils.MD5Generator;
+import com.dwell.it.utils.TextInputOutputUtils;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import org.jsoup.Jsoup;
@@ -20,6 +22,13 @@ public class DataSourceParseHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSourceParseHelper.class);
 
+    /** 解释一下为什么在这里使用LinkedHashMap这个数据结构
+     *  1.基于数据源页面的数据量有限，只有100页数据，每页都有30条记录，并且这些记录是存在重复的，决定使用LinkedHashMap来存储.
+     *  2.使用LinkedHashMap存储时，url不直接作为key,而是先md5处理一下，使原始很长的url哈希为16字节大小，3000条数据的key任何电脑都可以读取
+     *  3.如果数据量大到上亿条时，不建议使用LinkedHashMap，因为Map有装载因子，虽然天然支持动态扩容(基于链表)，实际使用时内存占用更大
+     *  4.数据量上亿条时，可以将访问记录记录分散在10000个文件中，每个文件最大500Mb, 让URL先hash再对10000去模运算，得到的结果就是url应保存的文件编号
+     *  然后依次对10000个数据进行处理，这样即使单台机器内存只有1GB,也可以使用这种方法处理数据.(与load-balance的处理类似)
+     */
     private LinkedHashMap<String, String> detailPageUrlMap;  // 详情页面url数据集合
 
     /**
@@ -133,8 +142,9 @@ public class DataSourceParseHelper {
 
         for (Element element : elementsList) {
             String url = elementSelectForNextPageLink(element);
-            if (!(detailPageUrlMap.containsValue(url))) {  // TODO: 这里hashmap的key 性能需要优化
-                detailPageUrlMap.put(url, url);
+            String md5Key = TextInputOutputUtils.safeTextContent(MD5Generator.generateMD5Identifier(url));
+            if (!(detailPageUrlMap.containsValue(md5Key))) {
+                detailPageUrlMap.put(md5Key, url);
 
                 String liteUrlPath = url.replaceAll("https://xa.zu.ke.com","");
                 String[] titleAndMainImageURL = elementSelectForTitleAndMainImageURL(element);          // 标题描述+房屋1张图片URL

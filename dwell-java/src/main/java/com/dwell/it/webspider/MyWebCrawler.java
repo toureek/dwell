@@ -11,6 +11,8 @@ public class MyWebCrawler extends WebCrawler {
     private static final Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
             + "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
 
+    private DataSourceParseHelper parseHelper = new DataSourceParseHelper();
+
 
     /**
      * This method receives two parameters. The first parameter is the page
@@ -46,6 +48,6 @@ public class MyWebCrawler extends WebCrawler {
 
         if (page == null)    return;
 
-        System.out.println(page.getWebURL().toString());
+        parseHelper.formatOriginalDataSourceOnWebPage(page);
     }
 }

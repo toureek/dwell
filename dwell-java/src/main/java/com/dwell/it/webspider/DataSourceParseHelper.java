@@ -1,6 +1,7 @@
 package com.dwell.it.webspider;
 
 import com.dwell.it.entities.House;
+import com.dwell.it.model.ModelFactory;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import org.jsoup.Jsoup;
@@ -134,7 +135,26 @@ public class DataSourceParseHelper {
             String url = elementSelectForNextPageLink(element);
             if (!(detailPageUrlMap.containsValue(url))) {  // TODO: 这里hashmap的key 性能需要优化
                 detailPageUrlMap.put(url, url);
-                // TODO: 具体解析与组装House Model, 并将其添加进列表中
+
+                String liteUrlPath = url.replaceAll("https://xa.zu.ke.com","");
+                String[] titleAndMainImageURL = elementSelectForTitleAndMainImageURL(element);          // 标题描述+房屋1张图片URL
+                String[] basicLDKInfo = elementSelectForBasicInfo(element);                             // 房屋基本信息
+                String lastUpdatedTime = elementSelectForLastUpdatedDatetime(element);                  // 房屋发布时间
+                String[] tagsInfo = elementSelectForTagsInfo(element);                                  // 房屋信息标签
+                String[] priceAndPaymentTypeInfo = elementSelectForPriceAndPaymentType(element);        // 房屋费用信息
+                String providerName = elementSelectForOpearatorBrand(element);                          // 房屋所属运营品牌
+
+                House house = ModelFactory.buildFirstClassWebPageHouse(liteUrlPath,
+                        titleAndMainImageURL,
+                        basicLDKInfo,
+                        lastUpdatedTime,
+                        tagsInfo,
+                        priceAndPaymentTypeInfo,
+                        providerName);
+
+                if ((house != null) && (!(houseArrayList.contains(house)))) {  // TODO: 稍后需要处理provider表的外键关联
+                    houseArrayList.add(house);
+                }
             }
         }
         return houseArrayList;

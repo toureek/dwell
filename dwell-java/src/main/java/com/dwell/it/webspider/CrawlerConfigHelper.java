@@ -22,7 +22,7 @@ public class CrawlerConfigHelper {
 
     private final Integer NUMBER_OF_CRAWLERS = 1;
     private final Integer MAX_DEPTH_OF_CRAWLING = 1;
-    private final Integer FETCHED_MAX_LIST_PAGE_COUNT = 100;                   // 【1至10页的一级列表页面 每页30条记录】
+    private final Integer FETCHED_MAX_LIST_PAGE_COUNT = 5;                   // 【1至10页的一级列表页面 每页30条记录】
     private final Integer HTTP_REQUEST_DELAY_NANO_TIME = 1000;                 //  1000毫秒=1秒
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlerConfigHelper.class);

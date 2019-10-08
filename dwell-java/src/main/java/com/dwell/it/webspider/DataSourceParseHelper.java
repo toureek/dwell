@@ -2,7 +2,9 @@ package com.dwell.it.webspider;
 
 import com.dwell.it.entities.House;
 import com.dwell.it.enums.WebPageDataSourceEnum;
+import com.dwell.it.exception.InternalMethodInvokeException;
 import com.dwell.it.model.ModelFactory;
+import com.dwell.it.utils.FileInputOutputUtils;
 import com.dwell.it.utils.MD5Generator;
 import com.dwell.it.utils.TextInputOutputUtils;
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -56,7 +58,11 @@ public class DataSourceParseHelper {
             // TODO: 详情页面解析
         } else {
             constructFirstClassPageData(elementsList);
-            // TODO: I/O Saving Fetched URLs
+            try {
+                FileInputOutputUtils.saveContentToFiles(WebPageDataSourceEnum.OUTPUT_FILENAME.toString(), detailPageUrlMap.values());
+            } catch (InternalMethodInvokeException e) {
+                logger.error(e.getMessage());    // 只记录内部调用异常
+            }
         }
     }
 
@@ -325,4 +331,6 @@ public class DataSourceParseHelper {
         }
         return "";
     }
+
+    
 }

@@ -14,5 +14,21 @@ repositories {
 }
 
 dependencies {
+	//	SpringBoot
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compile('org.springframework.boot:spring-boot-starter-aop')
+
+	//	Database
+	compile("com.mchange:c3p0:0.9.5.2")
+	runtimeOnly 'mysql:mysql-connector-java'
+
+	//	Unit Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'junit:junit'
+
+
+	//	Getters / Setters Utils
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 }

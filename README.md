@@ -2,7 +2,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp; Dwell is an application which can make it easier to find the good places to rent and to dwell in Xi'an City according to a few steps on <b>Data Visualization</b>. Now I'm going to code for learning new skills, sharing tips, and providing values for the city in my way. I hope you'll gonna like this.  
 
 ## Make the Plan.   
-+ There're 5 main parts in the project. <b>Fetch</b> DataSource + <b>Format</b> Data + <b>Save</b> Records + <b>Query</b> Records + <b>Display</b> Result.  
++ There're 4 main steps in the project. <b>Fetch</b> DataSource + <b>Save</b> Records + <b>Query</b> Records + <b>Display</b> Result.  
 + Manage the development in [Trello](https://trello.com)  including push-notifications from Continuous Integration server.
 + Base on Java [Spring Boot](https://spring.io/projects/spring-boot) as backend. &nbsp; [Amazon Corretto 8](https://aws.amazon.com/blogs/opensource/amazon-corretto-no-cost-distribution-openjdk-long-term-support/)  (An OpenJDK-8 for avoiding the affairs of copyright in legal)  
 + Base on [React.js](https://reactjs.org/) as frontend for displaying.  
@@ -31,6 +31,12 @@
 - 1.4 Parse the target DOM.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DOM is Document-Object-Model and I chose [Jsoup](https://jsoup.org/) as the DOM-Parsing-Utils in project.
 
+
+### 2. Save
+&nbsp;&nbsp;&nbsp;&nbsp;We can get the result as text-content when the fetched DOM of data-source be parsed, and we need to mapping the result into the database which can provid data persistence and query services. It means that we can only focus on the operations of programming-language-layer and we don't need to take care of the data persistence by ourselves.  
+
+- 2.1 Setup database environment  
+  
 
 
 #### Tips:  

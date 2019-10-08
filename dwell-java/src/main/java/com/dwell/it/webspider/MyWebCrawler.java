@@ -13,7 +13,6 @@ public class MyWebCrawler extends WebCrawler {
 
     private DataSourceParseHelper parseHelper = new DataSourceParseHelper();
 
-
     /**
      * This method receives two parameters. The first parameter is the page
      * in which we have discovered this new url and the second parameter is

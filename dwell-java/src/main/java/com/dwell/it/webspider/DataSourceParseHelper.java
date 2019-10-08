@@ -1,12 +1,14 @@
 package com.dwell.it.webspider;
 
 import com.dwell.it.entities.House;
+import com.dwell.it.enums.WebPageDataSourceEnum;
 import com.dwell.it.model.ModelFactory;
 import com.dwell.it.utils.MD5Generator;
 import com.dwell.it.utils.TextInputOutputUtils;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
-import org.jsoup.Jsoup;
+import org.jsoup.Jsoup
+        ;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -31,6 +33,7 @@ public class DataSourceParseHelper {
      */
     private LinkedHashMap<String, String> detailPageUrlMap;  // 详情页面url数据集合
 
+
     /**
      * 处理爬虫当前获取下来的页面数据
      * @param page 当前页面
@@ -49,11 +52,11 @@ public class DataSourceParseHelper {
             return;
         }
 
-        if (urlPath.startsWith("https://xa.zu.ke.com/zufang/xa")) {
+        if (urlPath.startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
             // TODO: 详情页面解析
         } else {
             constructFirstClassPageData(elementsList);
-            // TODO: 详情页面URL需要以I/O流的形式 存储到文件
+            // TODO: I/O Saving Fetched URLs
         }
     }
 
@@ -101,15 +104,14 @@ public class DataSourceParseHelper {
      * @return String[] htmlTags   抓取数据对象在HTML页面上的标签的字符串数组
      */
     private String[] keyHtmlElementTags(String urlPath) {
-        if (urlPath.toLowerCase().startsWith("https://xa.zu.ke.com/zufang/xa")) {
+        if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
             return new String[] {""};    // TODO: 二级页面原始节点tag
-        } else if (urlPath.toLowerCase().startsWith("https://xa.zu.ke.com")) {
-            return new String[] {".content__list--item"};     // 一级页面是列表  所以只有一个元素
+        } else if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.DATA_SOURCE_BASE_PAGE_PREFIX.toString())) {
+            return new String[] {WebPageDataSourceEnum.ITEM_OBJECT_TAG.toString()};     // 一级页面是列表  所以只有一个元素
         } else {
             return new String[] {""};
         }
     }
-
 
 
     /**
@@ -146,7 +148,7 @@ public class DataSourceParseHelper {
             if (!(detailPageUrlMap.containsValue(md5Key))) {
                 detailPageUrlMap.put(md5Key, url);
 
-                String liteUrlPath = url.replaceAll("https://xa.zu.ke.com","");
+                String liteUrlPath = url.replaceAll(WebPageDataSourceEnum.DATA_SOURCE_BASE_PAGE_PREFIX.toString(),"");
                 String[] titleAndMainImageURL = elementSelectForTitleAndMainImageURL(element);          // 标题描述+房屋1张图片URL
                 String[] basicLDKInfo = elementSelectForBasicInfo(element);                             // 房屋基本信息
                 String lastUpdatedTime = elementSelectForLastUpdatedDatetime(element);                  // 房屋发布时间
@@ -162,7 +164,7 @@ public class DataSourceParseHelper {
                         priceAndPaymentTypeInfo,
                         providerName);
 
-                if ((house != null) && (!(houseArrayList.contains(house)))) {  // TODO: 稍后需要处理provider表的外键关联
+                if ((house != null) && (!(houseArrayList.contains(house)))) {  // TODO: 处理provider表的外键关联
                     houseArrayList.add(house);
                 }
             }
@@ -171,18 +173,17 @@ public class DataSourceParseHelper {
     }
 
 
-
     /**
      * 获取【详情页】的URL：  element.selectForLink()
      * @param element Element: element  each elementObject from elementsList
      * @return  String: linkURL  点击当前item后 所要跳转到下一级页面的URL
      */
     private String elementSelectForNextPageLink(Element element) {
-        Elements detailURL = element.select(".content__list--item");     // 详情页面URL
+        Elements detailURL = element.select(WebPageDataSourceEnum.ITEM_TITLE_DESC_TAG.toString());     // 详情页面URL
         if (!(detailURL.isEmpty())) {
             String fetchedURL = detailURL.attr("href");  // HTML中URL的标签
             if ((fetchedURL != null) && fetchedURL.length() > 0) {  //  这是page1的第index0号房屋信息的linkURL，即详情页的URL
-                return "https://xa.zu.ke.com" + fetchedURL;
+                return WebPageDataSourceEnum.DATA_SOURCE_BASE_PAGE_PREFIX.toString() + fetchedURL;
             }
         }
         return "";
@@ -195,7 +196,7 @@ public class DataSourceParseHelper {
      * @return  String[] {title, imageURL}  返回两个元素的字符串数组，且第一个元素为房屋标题，后一个是房屋主图URL
      */
     private static String[] elementSelectForTitleAndMainImageURL(Element element) {
-        Elements wrapperObject = element.select(".content__list--item--aside");
+        Elements wrapperObject = element.select(WebPageDataSourceEnum.ITEM_TITLE_DESC_TAG.toString());
         String[] result = new String[] {"", ""};
         if (!(wrapperObject.isEmpty())) {
             Elements titleAndImageObject = wrapperObject.select(".lazyload");
@@ -227,7 +228,7 @@ public class DataSourceParseHelper {
         String cityZone, areaSize, aspect, descLDKInfo, stockInfo;
         cityZone = areaSize = aspect = descLDKInfo = stockInfo = "";
 
-        Elements wrapperStockObject = element.select(".content__list--item--des");
+        Elements wrapperStockObject = element.select(WebPageDataSourceEnum.ITEM_BASIC_INFO_TAG.toString());
         if (wrapperStockObject.isEmpty()) {
             return new String[] {cityZone, areaSize, aspect, descLDKInfo, stockInfo};
         }
@@ -236,14 +237,14 @@ public class DataSourceParseHelper {
         if (objText.length() > 0) {
             String[] itemsList = objText.split("/");
             for (int i = 0; i < itemsList.length-1; i++) {
-                if (itemsList[i].contains("㎡")) {
+                if (itemsList[i].contains(WebPageDataSourceEnum.OBJECT_AREA_TAG.toString())) {
                     areaSize = itemsList[i].trim().length() > 0 ? itemsList[i].trim() : "";                   // area
-                } else if (itemsList[i].contains("室")) {
+                } else if (itemsList[i].contains(WebPageDataSourceEnum.OBJECT_DKLs_TAG.toString())) {
                     descLDKInfo = itemsList[i].trim().length() > 0 ? itemsList[i].trim() : "";                // LDKDesc
-                } else if (itemsList[i].contains("东") ||
-                        itemsList[i].contains("南") ||
-                        itemsList[i].contains("西") ||
-                        itemsList[i].contains("北")) {
+                } else if (itemsList[i].contains(WebPageDataSourceEnum.OBJECT_ASPECT_EAST_TAG.toString()) ||
+                        itemsList[i].contains(WebPageDataSourceEnum.OBJECT_ASPECT_SOUTH_TAG.toString()) ||
+                        itemsList[i].contains(WebPageDataSourceEnum.OBJECT_ASPECT_WEST_TAG.toString()) ||
+                        itemsList[i].contains(WebPageDataSourceEnum.OBJECT_ASPECT_NORTH_TAG.toString())) {
                     aspect = itemsList[i].trim().length() > 0 ? itemsList[i].trim() : "";                     // aspect
                 } else {
                     cityZone = itemsList[i].trim().length() > 0 ? itemsList[i].trim() : "";                   // cityZone
@@ -251,7 +252,7 @@ public class DataSourceParseHelper {
             }
         }
 
-        Elements stockObj = wrapperStockObject.select(".room__left");  // stock
+        Elements stockObj = wrapperStockObject.select(WebPageDataSourceEnum.ITEM_STOCK_INFO_TAG.toString());  // stock
         if (!(stockObj.isEmpty())) {
             stockInfo = stockObj.text().length() > 0 ? stockObj.text() : "";
         }
@@ -265,7 +266,7 @@ public class DataSourceParseHelper {
      * @return          String: lastUpdatedTimeInfo
      */
     private String elementSelectForLastUpdatedDatetime(Element element) {
-        Elements lastUpdateTimeElement = element.select(".content__list--item--time");
+        Elements lastUpdateTimeElement = element.select(WebPageDataSourceEnum.ITEM_LAST_UPDATED_TIME_TAG.toString());
         if (!(lastUpdateTimeElement.isEmpty())) {
             String lastUpdateTimeText = lastUpdateTimeElement.text();
             return lastUpdateTimeText.length() > 0 ? lastUpdateTimeText : "";
@@ -280,7 +281,7 @@ public class DataSourceParseHelper {
      * @return          String[] tagsInfo
      */
     private String[] elementSelectForTagsInfo(Element element) {
-        Elements tagsElement = element.select(".content__list--item--bottom");
+        Elements tagsElement = element.select(WebPageDataSourceEnum.ITEM_TAGS_INFO_TAG.toString());
         if (!(tagsElement.isEmpty())) {
             String tagsText = tagsElement.text();
             if (tagsText.length() > 0) {
@@ -298,7 +299,7 @@ public class DataSourceParseHelper {
      * @return          String[] {price, paymentType}
      */
     private String[] elementSelectForPriceAndPaymentType(Element element) {
-        Elements priceElement = element.select(".content__list--item-price");
+        Elements priceElement = element.select(WebPageDataSourceEnum.ITEM_PRICE_AND_PAYMENT_TAG.toString());
         if (!(priceElement.isEmpty())) {
             String priceText = priceElement.text();
             String[] priceInfoAndPaymentTypeObj = priceText.split(" ");
@@ -317,7 +318,7 @@ public class DataSourceParseHelper {
      * @return          String: brand  返回运营商品牌信息
      */
     private String elementSelectForOpearatorBrand(Element element) {
-        Elements brandElement = element.select(".content__list--item--brand");
+        Elements brandElement = element.select(WebPageDataSourceEnum.ITEM_OPERATION_BRAND_TAG.toString());
         if (!(brandElement.isEmpty())) {
             String operationBrand = brandElement.text();
             return operationBrand.length() > 0 ? operationBrand : "";

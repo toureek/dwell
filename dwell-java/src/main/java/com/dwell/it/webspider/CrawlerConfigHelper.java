@@ -1,5 +1,6 @@
 package com.dwell.it.webspider;
 
+import com.dwell.it.enums.WebPageDataSourceEnum;
 import com.dwell.it.exception.InternalMethodInvokeException;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -21,19 +22,18 @@ public class CrawlerConfigHelper {
 
     private final Integer NUMBER_OF_CRAWLERS = 1;
     private final Integer MAX_DEPTH_OF_CRAWLING = 1;
-    private final Integer FETCHED_MAX_LIST_PAGE_COUNT = 3;                     // 【1至10页的一级列表页面 每页30条记录】
+    private final Integer FETCHED_MAX_LIST_PAGE_COUNT = 100;                   // 【1至10页的一级列表页面 每页30条记录】
     private final Integer HTTP_REQUEST_DELAY_NANO_TIME = 1000;                 //  1000毫秒=1秒
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlerConfigHelper.class);
 
 
     /**
-     * 配置爬虫自定义config 并启动爬虫服务
+     * 配置爬虫自定义config 并启动爬虫服务.  先执行一级页面的数据爬取，再执行二级页面的数据获取
      */
     public void setUpWebSpiderConfigAndStartCrawlerService() throws InternalMethodInvokeException {
         CrawlConfig config = setUpCrawlerConfiguration();
 
-        // TODO: 在一级页面请求完成之后 调整爬取页面数量的config 继续去请求二级页面的数据源
         try {
             CrawlController firstController = setUpCrawlerController(config);
             if (firstController == null)    return;
@@ -95,9 +95,11 @@ public class CrawlerConfigHelper {
         if (controller == null)    return;
 
         for (int i = 1; i <= FETCHED_MAX_LIST_PAGE_COUNT; i++) {
-            String url = String.format("%s/pg%d%s", "https://xa.zu.ke.com/zufang", i, "rt200600000001/#contentList");
+            String url = String.format("%s/pg%d%s",
+                    WebPageDataSourceEnum.WEB_CRAWLER_BASE_SEED.toString(),
+                    i,
+                    WebPageDataSourceEnum.SUB_URL_SEED.toString());
             controller.addSeed(url);
-            System.out.println(url);
         }
     }
 }

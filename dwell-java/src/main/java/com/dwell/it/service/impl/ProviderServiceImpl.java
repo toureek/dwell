@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProviderServiceImpl implements IProviderService {
 
+    public static final String providerUnknownName = "职业经纪人";
+
     @Autowired
     private IProviderDao iProviderDao;
 
@@ -93,5 +95,17 @@ public class ProviderServiceImpl implements IProviderService {
         } catch (Exception ex) {
             throw new DBManipulateException(String.format("删除这条provider数据失败: %s", ex.getMessage()));
         }
+    }
+
+
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public Integer isAllowedInsertNewOne(String name) {
+        if (name == null || name.length() == 0 || name.trim().length() == 0) {
+            name = providerUnknownName;    // Fix default value: 列表页面中 在应该显示运营商的位置 有时又不显示了 这里人工添加默认值
+        }
+        Provider provider = iProviderDao.searchTargetProvider(name);
+        return provider == null ? 0 : provider.getId();
     }
 }

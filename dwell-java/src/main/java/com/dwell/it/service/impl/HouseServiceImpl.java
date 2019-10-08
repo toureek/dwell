@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class HouseServiceImpl implements IHouseService {
 
@@ -92,5 +94,31 @@ public class HouseServiceImpl implements IHouseService {
 
 
 
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public boolean batchAddNewHouseList(List<House> list) {
+        if (list == null || list.size() == 0)    throw new DBManipulateException("没有要插入的数据");
+
+        try {
+            if (iHouseDao.batchInsertNewHouseList(list)) {
+                return true;
+            }
+            throw new DBManipulateException(String.format("本次批处理插入数据失败"));
+        } catch (Exception ex) {
+            throw new DBManipulateException(String.format("本次批处理插入数据失败: %s", ex.getMessage()));
+        }
+    }
+
+
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public boolean isAllowedToInsertNewHouseRecord(String houseTitle, String detailPageURL) {
+        if (detailPageURL == null || detailPageURL.trim().length() == 0) {
+            throw new DBManipulateException("这条houseItem detailPageURL条件为空");
+        }
+        return iHouseDao.searchTargetHouseByTitleAndURL(houseTitle, detailPageURL) == null;
+    }
 
 }

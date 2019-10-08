@@ -9,4 +9,8 @@ public interface IProviderService {
     Provider queryForSingleProvidertById(int id);
     boolean modifyProvider(Provider provider);
     boolean removeProviderById(int id);
+
+
+    // ForeignKey Handler
+    Integer isAllowedInsertNewOne(String name);
 }

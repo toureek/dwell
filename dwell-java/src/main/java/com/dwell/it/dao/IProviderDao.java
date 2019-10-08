@@ -12,4 +12,8 @@ public interface IProviderDao {
     int updateProvider(Provider provider);
     int deleteProviderById(int id);
 
+
+    // Foreign-Key handler
+    Provider searchTargetProvider(String name);
+
 }

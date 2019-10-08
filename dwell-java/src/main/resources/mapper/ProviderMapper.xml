@@ -43,4 +43,14 @@
     </delete>
 
 
+    <!-- Foreign Key Handler Starts -->
+
+    <select id="searchTargetProvider" resultType="com.dwell.it.entities.Provider">
+        select <include refid="Provider_Full_Column_List" />
+        from t_providers
+        where name = #{name}
+    </select>
+
+    <!-- Foreign Key Handler Starts -->
+
 </mapper>

@@ -7,6 +7,7 @@ import com.dwell.it.model.ModelFactory;
 import com.dwell.it.utils.FileInputOutputUtils;
 import com.dwell.it.utils.MD5Generator;
 import com.dwell.it.utils.TextInputOutputUtils;
+import com.dwell.it.utils.database.DatabaseStorageUtils;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import org.jsoup.Jsoup
@@ -129,7 +130,11 @@ public class DataSourceParseHelper {
         for (Elements elements : elementsList) {
             houseArrayList = parsedListPageContentAndPrepareDBRequirements(elements);
             System.out.println(houseArrayList);
-            //TODO: 批量插入数据库
+            try {
+                DatabaseStorageUtils.batchInsertHouseItemsInDatabase(houseArrayList);    // 批量插入数据库
+            } catch (InternalMethodInvokeException e) {
+                logger.error(e.getMessage());                                            // 只记录异常
+            }
         }
     }
 
@@ -170,8 +175,9 @@ public class DataSourceParseHelper {
                         priceAndPaymentTypeInfo,
                         providerName);
 
-                if ((house != null) && (!(houseArrayList.contains(house)))) {  // TODO: 处理provider表的外键关联
-                    houseArrayList.add(house);
+                if ((house != null) && (!(houseArrayList.contains(house))) &&
+                        DatabaseStorageUtils.isHouseTableForeignKeyProviderIdExisted(house)) {
+                    houseArrayList.add(house);   // Fix the if-condition of the foreign-key on (ProviderId) in t_houses
                 }
             }
         }

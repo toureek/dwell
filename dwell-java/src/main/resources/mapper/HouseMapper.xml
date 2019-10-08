@@ -129,4 +129,43 @@
         delete from t_houses where id = #{id}
     </delete>
 
+
+
+    <!-- SQLMapper Batch-Operations Starts -->
+
+    <!--MyBatis BatchOperations: ref to http://www.mybatis.org/mybatis-3/sqlmap-xml.html-->
+    <insert id="batchInsertNewHouseList" parameterType="java.util.List">
+        INSERT INTO t_houses
+        (provider_id, title, detail_page_url, area, aspect, living_dining_kitchen_info, stock_count, main_image_url,
+        city_zone, info_tags, last_update_time, trade_price, trade_price_unit)
+        VALUES
+        <foreach collection="list" item="house" separator=",">
+            (#{house.providerId},
+            #{house.title},
+            #{house.detailPageUrl},
+            #{house.area},
+            #{house.aspect},
+            #{house.livingDiningKitchenInfo},
+            #{house.stockCount},
+            #{house.mainImageUrl},
+            #{house.cityZone},
+            #{house.infoTags},
+            #{house.lastUpdateTime},
+            #{house.tradePrice},
+            #{house.tradePriceUnit})
+        </foreach>
+    </insert>
+
+    <!-- SQLMapper Batch-Operations Ends -->
+
+
+    <!-- ForeignKey Handler Starts -->
+
+    <select id="searchTargetHouseByTitleAndURL" resultMap="houseBaseResultMap">
+        select <include refid="House_ListPage_Column_List" /> from t_houses
+        where title=#{houseTitle} and detail_page_url=#{detailPageUrl}
+    </select>
+
+    <!-- ForeignKey Handler Ends -->
+
 </mapper>

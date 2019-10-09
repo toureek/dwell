@@ -4,8 +4,10 @@ import com.dwell.it.entities.House;
 import com.dwell.it.enums.DataSingleton;
 import com.dwell.it.exception.InternalMethodInvokeException;
 import com.dwell.it.model.HttpJSONResponse;
+import com.dwell.it.service.IHouseService;
 import com.dwell.it.utils.FileInputOutputUtils;
 import com.dwell.it.utils.database.DatabaseStorageUtils;
+import com.dwell.it.utils.geo.AMapApiGeoUtils;
 import com.dwell.it.webspider.CrawlerConfigHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,11 @@ public class CrawlerController {
 
     @Autowired
     private CrawlerConfigHelper crawlerConfigHelper;
+
+    @Autowired
+    private IHouseService iHouseService;
+
+    private final String locationGeoFileName = "final_coordinates.txt";
 
 
     @RequestMapping(value = "/crawlers")
@@ -39,14 +46,28 @@ public class CrawlerController {
     }
 
 
-    /** 使用高德地图GEO 从原始地址数据 解析为坐标数据：
+    /**
+     * 使用高德地图GEO 从原始地址数据 解析为坐标数据
+     *
      * @return Json-Response
      */
     @RequestMapping(value = "/coordinates", method = RequestMethod.GET)
     public HttpJSONResponse batchFetchingGPSInfoAndUpdateDatabaseToLatest() {
-        // 1 先数据库过滤 满足查询condition的数据记录
-        // 2 带着address信息 去批量请求SDK 获取解析后的GPS信息
-        // 3 将SDK返回的GPS信息 再批量修改进数据库
+        if (!DataSingleton.INSTANCE.isDatasourceFetched()) {
+            return HttpJSONResponse.ok("请先调用/fetch/crawlers 为获取GPS数据做准备");
+        }
+
+        List<House> qualifiedHouseList = iHouseService.queryQualifiedAddressHouseListWithoutGeoInfo();
+        AMapApiGeoUtils geoUtils = new AMapApiGeoUtils();
+        List<String> geoInfoList = geoUtils.fetchQualifiedHouseListAfterRequestedAMapApi(qualifiedHouseList);
+        System.out.println(geoInfoList);
+        try {
+            FileInputOutputUtils.saveContentToFiles(locationGeoFileName, geoInfoList);
+            DatabaseStorageUtils.batchUpdateHouseItemForGeoInfo(qualifiedHouseList);
+            return HttpJSONResponse.ok("数据整理完毕： 已将符合地理信息编码的地址 转化为经纬度信息");
+        } catch (InternalMethodInvokeException e) {
+            e.printStackTrace();  // 只记录
+        }
 
         return HttpJSONResponse.errorMessage("数据整理出现异常 请查询错误日志");
     }

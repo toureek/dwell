@@ -178,4 +178,31 @@
     </select>
     <!-- Handle with data-dependency on record in database Ends  -->
 
+
+    <!-- resultType="String" 返回的是单字段的jsonArray  -->
+    <select id="fetchExistedAddressQualifiedHouseListWithoutGeo" resultMap="houseBaseResultMap">
+        select a.id, a.city_zone, a.geo_info from t_houses a where a.confirm_apartment_type = 2 and LENGTH(city_zone) >
+        5
+    </select>
+
+
+    <select id="fetchExistedAddressQualifiedHouseListWithinGeo" resultMap="houseBaseResultMap">
+        select a.id, a.city_zone, a.trade_price, a.geo_info, a.main_image_url
+        from t_houses a
+        where a.confirm_apartment_type = 2 and LENGTH(city_zone) > 5 and a.geo_info != '0,0';
+    </select>
+
+
+    <!--  Batch Update Operation  -->
+    <update id="batchUpdateHouseGeoInfo" parameterType="java.util.List">
+        <foreach collection="list" item="house" separator=";">
+            update t_houses
+            <set>
+                geo_info=#{house.geoInfo}
+            </set>
+            where id=#{house.id}
+        </foreach>
+    </update>
+
+
 </mapper>

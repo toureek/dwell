@@ -145,4 +145,18 @@ public class DatabaseStorageUtils {
         }
         return null;
     }
+
+
+    /**
+     * 想数据库 批量修改location坐标信息 coordinates
+     *
+     * @param list 要修改的数据集合
+     */
+    public static void batchUpdateHouseItemForGeoInfo(List<House> list) {
+        try {
+            databaseStorageUtils.iHouseService.batchUpdateLocationGeoList(list);
+        } catch (DBManipulateException ex) {
+            System.out.println("batchInsertHouseItemsInDatabase 运营出现异常" + ex.getStackTrace());
+        }
+    }
 }

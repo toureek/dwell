@@ -29,4 +29,13 @@ public interface IHouseDao {
                                          @Param("detailPageUrl") String detailPageUrl);
 
     List<House> searchHousesByPageURL(@Param("url") String url);  // 由url反向查询house 返回的是列表页面house对象 不是houseDetail
+
+
+    // Amap-SDK Requesting condition
+    List<House> fetchExistedAddressQualifiedHouseListWithoutGeo();
+
+    List<House> fetchExistedAddressQualifiedHouseListWithinGeo();
+
+    boolean batchUpdateHouseGeoInfo(@Param("list") List<House> list);  // Batch Update after fetch coordinates in Amap-SDK
+
 }

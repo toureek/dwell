@@ -23,4 +23,14 @@ public interface IHouseService {
 
     // Handle with data-dependency on record in database
     House findTargetHouseByPageUrl(String pageURL);  // 由url反向查询列表页面的数据 返回house对象 不是houseDetail
+
+
+    // Amap-SDK requesting
+    List<House> queryQualifiedAddressHouseListWithoutGeoInfo();
+
+    List<House> queryQualifiedAddressHouseListWithinGeoInfo();
+
+    boolean batchUpdateLocationGeoList(List<House> list);  // Batch Update after fetch coordinates in Amap-SDK
+
+
 }

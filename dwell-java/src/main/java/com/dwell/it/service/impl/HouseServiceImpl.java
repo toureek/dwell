@@ -145,4 +145,54 @@ public class HouseServiceImpl implements IHouseService {
         }
     }
 
+
+    // Amap-SDK Requesting condition
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<House> queryQualifiedAddressHouseListWithoutGeoInfo() {
+        try {
+            List<House> list = iHouseDao.fetchExistedAddressQualifiedHouseListWithoutGeo();
+            if (list == null && list.size() == 0) {
+                throw new MessageRuntimeException("没有符合条件的房屋信息");
+            }
+            return list;
+        } catch (Exception ex) {
+            throw new MessageRuntimeException("没有符合条件的房屋信息");
+        }
+    }
+
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<House> queryQualifiedAddressHouseListWithinGeoInfo() {
+        try {
+            List<House> list = iHouseDao.fetchExistedAddressQualifiedHouseListWithinGeo();
+            if (list == null && list.size() == 0) {
+                throw new MessageRuntimeException("没有符合条件的房屋信息");
+            }
+            return list;
+        } catch (Exception ex) {
+            throw new MessageRuntimeException("没有符合条件的房屋信息");
+        }
+    }
+
+
+
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public boolean batchUpdateLocationGeoList(List<House> list) {
+        if (list == null || list.size() == 0) {
+            throw new MessageRuntimeException("没有符合条件的房屋信息");
+        }
+        try {
+            if (iHouseDao.batchUpdateHouseGeoInfo(list)) {
+                return true;
+            }
+            throw new DBManipulateException(String.format("本次批处理修改GEO数据失败"));
+        } catch (DBManipulateException ex) {
+            throw new DBManipulateException(String.format("本次批处理修改GEO数据失败: %s", ex.getMessage()));
+        }
+    }
+
 }

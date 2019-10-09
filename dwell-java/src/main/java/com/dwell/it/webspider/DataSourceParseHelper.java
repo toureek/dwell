@@ -412,8 +412,41 @@ public class DataSourceParseHelper {
             } else if (i == 1) {
                 String result = TextInputOutputUtils.fetchDateTimeYYMMDDFromStringText(objectList.text());
                 houseDetail.setPublishDateTime(TextInputOutputUtils.safeTextContent(result));
+            } else if (i == 2) {
+                // TODO: Ajax Request for Telephone-Numbers
+            } else if (i == 3) {
+                Element object = objectList.first();  // 只返回一个元素
+                String[] bannerURLList = parseElementObjectAndSelectForBannerURLs(object);
+                houseDetail.setBannerImageUrls(StringUtil.join(bannerURLList, ";"));     // banner字符串以分号分隔开
+            } else if (i == 6) {  // 标签Tags
+                String[] detailTags = objectList.text().split(" ");
+                houseDetail.setInfoTags(StringUtil.join(detailTags, ";"));               // tags以分号隔开
+            } else if (i == 7) {  // 租赁方式
+                String[] subResidenceTags = objectList.text().split(" ");
+                for (String keyword : subResidenceTags) {
+                    if (keyword.contains(WebPageDataSourceEnum.OBJECT_RENT_TEXT_TAG.toString())) {
+                        houseDetail.setRentHouseType(keyword);                                // rentType
+                    }
+                }
+            } else if (i == 8) {  // 联系人头像avator-url
+                String styleTagText = objectList.attr(WebPageDataSourceEnum.OBJECT_AVATAR_URL_TAG.toString());
+                String avatarURL = parseAvatarUrlFromHtmlTagSource(styleTagText);
+                String avatar = avatarURL.length() < 1 ? WebPageDataSourceEnum.USER_AVATAR_URL_PLACEHOLDER.toString() : avatarURL;
+                contact.setAvatar(avatar);
+            } else if (i == 9) {  // 联系人姓名
+                String contactNameText = objectList.attr("title");
+                contact.setName(TextInputOutputUtils.safeTextContent(contactNameText));
+            } else if (i == 10) {  // 联系人title
+                int length = objectList.text().length();
+                String contactTitleTagText = objectList.text().substring(0, (int)(length/2));
+                contact.setTitle(TextInputOutputUtils.safeTextContent(contactTitleTagText));
             } else {
-                // TODO: other DOM-Parsing...
+                /**  Do nothing: in case of new itemTags in future
+                 *     if (i == 4)  starterPrice
+                 *     if (i == 5)  do nothing on this Tag  default-paymentType is "元/月";
+                 *     if (i == 11) Ajax
+                 *     html-source: <p class="content__aside__list--bottom oneline" data-el="updatePhone" data-housecode="XA2080137219586129920">&nbsp;</p>
+                 */
             }
         }
 
@@ -429,5 +462,40 @@ public class DataSourceParseHelper {
     private void saveHouseDetailObjectToDatabase(HouseDetail houseDetail) {
         DatabaseStorageUtils.updateHouseInfoForDetails(houseDetail);
     }
+
+
+    /**
+     * 解析二级页面情页面Banner的图片URL列表
+     * @param element 每一个HTML父节点是content__article__slide__wrapper的元素
+     * @return  String[] 公寓详情页面Banner的图片URL列表
+     */
+    private String[] parseElementObjectAndSelectForBannerURLs(Element element) {
+        if (element == null)    return new String[] {""};
+
+        List<String> list = new LinkedList<>();
+        Elements objectList = element.select(WebPageDataSourceEnum.ITEM_2ND_BANNER_ITEM_TAG.toString());
+        for (Element object : objectList) {
+            String imageURL = object.childNodes().get(1).attr(WebPageDataSourceEnum.ITEM_2ND_BANNER_IMAGE_TAG.toString());
+            list.add(imageURL.length() > 0 ? imageURL : "");
+        }
+        return TextInputOutputUtils.convertStringListToStringArray(list);
+    }
+
+
+
+    /**
+     * 获取二级页面上 指定的URL， 并返回这个URL
+     * @param inputText 字符串文本
+     * @return url
+     */
+    private String parseAvatarUrlFromHtmlTagSource(String inputText) {
+        if (inputText.isEmpty())    return "";
+
+        String text = TextInputOutputUtils.detectAndExtractFirstUrlToTheEnd(inputText);
+        String result = text.replace(")", "");
+        result = result.replace(";", "");
+        return result;
+    }
+
 
 }

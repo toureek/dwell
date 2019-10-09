@@ -2,7 +2,14 @@ package com.dwell.it.utils;
 
 import com.dwell.it.enums.WebPageDataSourceEnum;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class TextInputOutputUtils {
+
+    // Refer from https://stackoverflow.com/questions/18591242/java-extract-date-from-string-using-regex-failing
+    private static final String dateFormatYYMMDDRegEx = "(19|20)\\d\\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])";
+
 
     /**
      * 安全文本
@@ -27,5 +34,23 @@ public class TextInputOutputUtils {
         return pathFilter;
     }
 
+
+
+    /**
+     * 在一串文本中获取文本中所有的的时间、日期
+     * @param inputText 输入字符串
+     * @return String[] datetimes
+     */
+    public static String fetchDateTimeYYMMDDFromStringText(String inputText) {
+        if (inputText == null || inputText.isEmpty())    return "";
+
+        Matcher matcher = Pattern.compile(dateFormatYYMMDDRegEx).matcher(inputText);
+        while (matcher.find()) {
+            int matchStart = matcher.start(1);
+            int matchEnd = matcher.end();
+            return inputText.substring(matchStart, matchEnd);
+        }
+        return "";
+    }
 
 }

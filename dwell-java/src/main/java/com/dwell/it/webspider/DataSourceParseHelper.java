@@ -13,6 +13,7 @@ import com.dwell.it.utils.database.DatabaseStorageUtils;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import org.jsoup.Jsoup;
+import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -385,7 +386,7 @@ public class DataSourceParseHelper {
             fetchedHouseDetail = fetchedResidentItemAndFixDatabaseForeignKeyRequirments(elementsList, house.getProviderId());
             houseDetail.updateToLatestResidentType(fetchedHouseDetail);
             System.out.println(fetchedHouseDetail);
-            // TODO: 将最终构造完成的数据 批量修改进入数据库
+            saveHouseDetailObjectToDatabase(houseDetail);
         }
     }
 
@@ -401,10 +402,32 @@ public class DataSourceParseHelper {
 
         HouseDetail houseDetail = new HouseDetail();
         Contact contact = new Contact();
-        contact.setProviderId(providerId);  // TODO: ProviderId is the foreign-key
+        contact.setProviderId(providerId);  // providerId is the foreign-key
+
+        for (int i = 0; i < elementsList.size(); i++) {
+            Elements objectList = elementsList.get(i);
+            if (i == 0) {
+                String titleText = objectList.text();
+                houseDetail.setAddress(TextInputOutputUtils.safeTextContent(titleText));  // Address
+            } else if (i == 1) {
+                String result = TextInputOutputUtils.fetchDateTimeYYMMDDFromStringText(objectList.text());
+                houseDetail.setPublishDateTime(TextInputOutputUtils.safeTextContent(result));
+            } else {
+                // TODO: other DOM-Parsing...
+            }
+        }
 
         return houseDetail;
     }
 
+
+
+    /**
+     * 将详情页面的数据 存入数据库 (因为在访问列表页面的时候，已经将数据插入过了，这里实际上时补充数据 SQL-Update语句)
+     * @param houseDetail 要update的数据记录
+     */
+    private void saveHouseDetailObjectToDatabase(HouseDetail houseDetail) {
+        DatabaseStorageUtils.updateHouseInfoForDetails(houseDetail);
+    }
 
 }

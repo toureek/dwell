@@ -1,6 +1,7 @@
 package com.dwell.it.utils.database;
 
 import com.dwell.it.entities.House;
+import com.dwell.it.entities.HouseDetail;
 import com.dwell.it.entities.Provider;
 import com.dwell.it.exception.DBManipulateException;
 import com.dwell.it.exception.InternalMethodInvokeException;
@@ -48,7 +49,6 @@ public class DatabaseStorageUtils {
     }
 
 
-
     /**
      * 一级页面数据存入数据库的操作
      * @param house 一级页面的houseItem
@@ -63,7 +63,6 @@ public class DatabaseStorageUtils {
         }
         return databaseStorageUtils.iHouseService.isAllowedToInsertNewHouseRecord(house.getTitle(), house.getDetailPageUrl());
     }
-
 
 
     /**
@@ -86,7 +85,6 @@ public class DatabaseStorageUtils {
     }
 
 
-
     /**
      * 只处理数据库中已存在的数据(由列表页面获取并存入数据库的)， 这里是反向查询(由url，反向查询house)
      * @param url 详情页面url
@@ -96,5 +94,14 @@ public class DatabaseStorageUtils {
         if (url == null || url.length() == 0)    return null;
 
         return databaseStorageUtils.iHouseService.findTargetHouseByPageUrl(url);
+    }
+
+
+    /**
+     * 扩展单条house记录的详情信息 （之前在访问列表页面的时候，数据已经插入数据库了，当请求完详情页后，更新之前house不完整的数据为houseDetail）
+     * @param houseDetail 详情页面的数据信息
+     */
+    public static void updateHouseInfoForDetails(HouseDetail houseDetail) {
+        databaseStorageUtils.iHouseService.modifyHouseDetailOne(houseDetail);
     }
 }

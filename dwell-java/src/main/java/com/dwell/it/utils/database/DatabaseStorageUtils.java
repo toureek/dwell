@@ -1,5 +1,6 @@
 package com.dwell.it.utils.database;
 
+import com.dwell.it.entities.Contact;
 import com.dwell.it.entities.House;
 import com.dwell.it.entities.HouseDetail;
 import com.dwell.it.entities.Provider;
@@ -108,5 +109,40 @@ public class DatabaseStorageUtils {
      */
     public static void updateHouseInfoForDetails(HouseDetail houseDetail) {
         databaseStorageUtils.iHouseService.modifyHouseDetailOne(houseDetail);
+    }
+
+
+    /**
+     * 由contactName和telephone 反向查询 从contact表获取contactId主键
+     * 策略： 如果直接能查询到记录, 直接返回这条记录的主键；  否则，先把这条contact记录存入数据库，再返回这条记录的主键
+     *
+     * @param item 由网页数据构造出的contact
+     * @return contactId 主键
+     */
+    public static Integer fetchContactIdBaseOnDatabaseRequirements(Contact item) {
+        Contact checkContact = findTargetContactByNamePhoneAndId(item.getName(), item.getTelephone(), item.getProviderId());
+        if (checkContact == null) {
+            databaseStorageUtils.iContactService.addNewContactOne(item);
+            Contact contact = findTargetContactByNamePhoneAndId(item.getName(), item.getTelephone(), item.getProviderId());
+            return contact.getId();
+        }
+        return checkContact.getId();
+    }
+
+
+    /**
+     * 从数据库中查询一次 检查由网页构造的contact是否在数据库中已经存在了，如果存在就返回这个对象 不存在返回null
+     *
+     * @param name      contactName
+     * @param telephone contactTelephone
+     * @param id        contact_provider_id
+     * @return contact
+     */
+    private static Contact findTargetContactByNamePhoneAndId(String name, String telephone, Integer id) {
+        Contact checkContact = databaseStorageUtils.iContactService.searchingTargetContact(name, telephone, id);
+        if (checkContact != null) {
+            return checkContact;
+        }
+        return null;
     }
 }

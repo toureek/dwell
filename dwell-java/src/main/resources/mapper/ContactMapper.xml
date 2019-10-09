@@ -48,4 +48,12 @@
         delete from t_contacts where id = #{id}
     </delete>
 
+
+    <select id="searchTargetContact" resultType="com.dwell.it.entities.Contact">
+        select
+        <include refid="Contact_Full_Column_List"/>
+        from t_contacts
+        where name=#{name} and telephone=#{telephone} and provider_id=#{providerId}
+    </select>
+
 </mapper>

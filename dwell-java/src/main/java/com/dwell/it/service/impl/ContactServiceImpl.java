@@ -101,4 +101,23 @@ public class ContactServiceImpl implements IContactService {
         }
     }
 
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public Contact searchingTargetContact(String name, String telephone, Integer providerId) {
+        if (name == null || telephone == null || providerId == null) return null;
+
+        if (name.length() == 0 || telephone.length() == 0 || providerId < 1) return null;
+
+        try {
+            Contact contact = iContactDao.searchTargetContact(name, telephone, providerId);
+            if (contact != null) {
+                return contact;
+            }
+            return null;
+        } catch (Exception ex) {
+            throw new MessageRuntimeException(ex.getMessage());
+        }
+    }
+
 }

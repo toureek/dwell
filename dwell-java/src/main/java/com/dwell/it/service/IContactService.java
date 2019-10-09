@@ -12,4 +12,8 @@ public interface IContactService {
     boolean modifyContact(Contact contact);
 
     boolean removeContactById(int id);
+
+
+    // 反向查询连信任信息
+    Contact searchingTargetContact(String name, String telephone, Integer providerId);
 }

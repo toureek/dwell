@@ -40,7 +40,7 @@ public class CrawlerConfigHelper {
         try {  // 在一级页面请求完成之后 调整爬取页面数量的config 继续去请求二级页面的数据源
             try {
                 CrawlController firstController = setUpCrawlerController(config);
-                if (firstController == null)    return;
+                if (firstController == null) return;
 
                 addFirstClassWebPageDataSourceUrl(firstController);
                 firstController.start(MyWebCrawler.class, NUMBER_OF_CRAWLERS);
@@ -66,6 +66,7 @@ public class CrawlerConfigHelper {
 
     /**
      * 配置爬虫基本属性
+     *
      * @return CrawlConfig: config 文件
      */
     private CrawlConfig setUpCrawlerConfiguration() {
@@ -86,6 +87,7 @@ public class CrawlerConfigHelper {
 
     /**
      * 配置爬虫controller
+     *
      * @param config 爬虫controller配置
      * @return 爬虫controller
      */
@@ -107,10 +109,11 @@ public class CrawlerConfigHelper {
 
     /**
      * 获取一级页面的数据，包含详情页面URLs
+     *
      * @param controller 爬虫实例
      */
     private void addFirstClassWebPageDataSourceUrl(CrawlController controller) {
-        if (controller == null)    return;
+        if (controller == null) return;
 
         for (int i = 1; i <= FETCHED_MAX_LIST_PAGE_COUNT; i++) {
             String url = String.format("%s/pg%d%s",

@@ -72,7 +72,6 @@ public class DataSourceParseHelper {
 
         if (urlPath.startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
             constructSecondClassPageDataAndSaveToDatabase(elementsList, urlPath);
-
         } else {
             constructFirstClassPageData(elementsList);
             try {
@@ -380,7 +379,6 @@ public class DataSourceParseHelper {
         House house = DatabaseStorageUtils.searchingTargetHouseByPageURL(shortLinkPath);
         HouseDetail houseDetail = new HouseDetail(house);
         HouseDetail fetchedHouseDetail;
-
         if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {  // 二级页面 住宅类型
             fetchedHouseDetail = fetchedResidentItemAndFixDatabaseForeignKeyRequirments(elementsList, house.getProviderId());
             houseDetail.updateToLatestResidentType(fetchedHouseDetail);
@@ -391,6 +389,7 @@ public class DataSourceParseHelper {
 
 
     /**
+     * TODO: Function is too long! Need to be refactored !!!!!!!!!
      * 解析并返回在二级页面（住宅类型）中，公寓对象的数据. 并在构造houseDetail对象后，在程序返回前，解决数据库中contactId的外键依赖问题
      *
      * @param elementsList HTML对应元素的结果集合
@@ -413,7 +412,6 @@ public class DataSourceParseHelper {
                 String result = TextInputOutputUtils.fetchDateTimeYYMMDDFromStringText(objectList.text());
                 houseDetail.setPublishDateTime(TextInputOutputUtils.safeTextContent(result));
             } else if (i == 2) {
-
                 String residenceNumberText = TextInputOutputUtils.fetchNumbersAndLettersFromStringText(objectList.text());
                 houseDetail.setIdentifier(TextInputOutputUtils.safeTextContent(residenceNumberText));
                 if (residenceNumberText.length() > 0) {
@@ -466,10 +464,22 @@ public class DataSourceParseHelper {
                 houseDetail.updateResidentFacilitiesInfoFromMapData(map);
             } else if (i == 14) {  // 房源描述文案text
                 Element objElement = objectList.first();
-                if (contact.getTitle().length() > 0) {
+
+                /* Fix bug in if-condition:
+    java.lang.NullPointerException: null
+	at com.dwell.it.webspider.DataSourceParseHelper.fetchedResidentItemAndFixDatabaseForeignKeyRequirments(DataSourceParseHelper.java:468) ~[classes/:na]
+	at com.dwell.it.webspider.DataSourceParseHelper.constructSecondClassPageDataAndSaveToDatabase(DataSourceParseHelper.java:383) ~[classes/:na]
+	at com.dwell.it.webspider.DataSourceParseHelper.formatOriginalDataSourceOnWebPage(DataSourceParseHelper.java:74) ~[classes/:na]
+	at com.dwell.it.webspider.MyWebCrawler.visit(MyWebCrawler.java:50) ~[classes/:na]
+	at edu.uci.ics.crawler4j.crawler.WebCrawler.processPage(WebCrawler.java:523) [crawler4j-4.4.0.jar:na]
+	at edu.uci.ics.crawler4j.crawler.WebCrawler.run(WebCrawler.java:306) [crawler4j-4.4.0.jar:na]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_202]
+                 */
+
+                if (contact.getTitle().length() > 0 && objElement.text().length() > 0) {
                     String descriptions = objElement.text().replace(WebPageDataSourceEnum.TEXT_WILL_BE_REMOVED_C.toString(), "")
                             .replace(contact.getTitle(), "");
-                    houseDetail.setHouseDescription(descriptions);
+                    houseDetail.setHouseDescription(descriptions.length() > 0 ? descriptions : "...");
                 }
             } else {
                 /**  Do nothing: in case of new itemTags in future
@@ -481,6 +491,8 @@ public class DataSourceParseHelper {
             }
         }
 
+        Integer contactId = DatabaseStorageUtils.fetchContactIdBaseOnDatabaseRequirements(contact);
+        houseDetail.setContactId(contactId);
         return houseDetail;
     }
 
@@ -585,6 +597,7 @@ public class DataSourceParseHelper {
 
 
     // ------------------------  构造获取Ajax请求并获取数据 ------------------------
+
     /**
      * 通过houseCodes去请求Ajax 获取电话号码
      *

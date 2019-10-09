@@ -3,13 +3,13 @@
 
 <mapper namespace="com.dwell.it.dao.IProviderDao">
 
-    <resultMap id="providerResultMap" type="com.dwell.it.entities.Provider" >
-        <id column="id" property="id" jdbcType="INTEGER" />
-        <result column="name" property="name" jdbcType="VARCHAR" />
-        <result column="descriptions" property="descriptions" jdbcType="VARCHAR" />
+    <resultMap id="providerResultMap" type="com.dwell.it.entities.Provider">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="descriptions" property="descriptions" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <sql id="Provider_Full_Column_List" >
+    <sql id="Provider_Full_Column_List">
         id, name, descriptions
     </sql>
 
@@ -24,7 +24,8 @@
 
 
     <select id="fetchSingleProviderById" resultType="com.dwell.it.entities.Provider">
-        select <include refid="Provider_Full_Column_List" />
+        select
+        <include refid="Provider_Full_Column_List"/>
         from t_providers
         where id = #{id}
     </select>
@@ -46,7 +47,8 @@
     <!-- Foreign Key Handler Starts -->
 
     <select id="searchTargetProvider" resultType="com.dwell.it.entities.Provider">
-        select <include refid="Provider_Full_Column_List" />
+        select
+        <include refid="Provider_Full_Column_List"/>
         from t_providers
         where name = #{name}
     </select>

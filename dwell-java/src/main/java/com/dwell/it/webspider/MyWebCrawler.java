@@ -26,7 +26,7 @@ public class MyWebCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        if (href.isEmpty())    return false;
+        if (href.isEmpty()) return false;
 
         boolean matchResult = !FILTERS.matcher(href).matches();
         if (href.toLowerCase().startsWith("https://xa.zu.ke.com/zufang/pg")) {
@@ -45,7 +45,7 @@ public class MyWebCrawler extends WebCrawler {
     public void visit(Page page) {
         super.visit(page);
 
-        if (page == null)    return;
+        if (page == null) return;
 
         parseHelper.formatOriginalDataSourceOnWebPage(page);
     }

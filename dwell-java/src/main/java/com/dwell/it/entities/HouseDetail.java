@@ -22,15 +22,15 @@ public class HouseDetail extends House {
     private String houseDescription;                                   // 房屋描述
 
     // ########################### ApartmentType Starts  需要修改父类的infoTags ###########################
-    private String existSubway;                        				   // 是否近地铁             0 未知（不显示）； 1 是； 2 否
-    private String existElevator;                      				   // 是否提供电梯           0 未知（不显示）； 1 提供； 2 不提供
-    private String existShop;                          				   // 是否近便利店           0 未知（不显示）； 1 是； 2 否
-    private String existParking;                       				   // 是否提供停车场         0 未知（不显示）； 1 提供； 2 不提供
-    private String existGym;                           				   // 是否有健身房           0 未知（不显示）； 1 提供； 2 不提供
-    private String existPlayground;                    				   // 是否提供活动场地        0 未知（不显示）； 1 提供； 2 不提供
-    private String existSecurityMonitoring;            				   // 是否提供视频防盗监控    0 未知（不显示）； 1 提供； 2 不提供
-    private String existBookBar;                       				   // 是否提供书吧           0 未知（不显示）； 1 提供； 2 不提供
-    private String existClubBar;                       				   // 是否提供吧台           0 未知（不显示）； 1 提供； 2 不提供
+    private String existSubway;                                           // 是否近地铁             0 未知（不显示）； 1 是； 2 否
+    private String existElevator;                                       // 是否提供电梯           0 未知（不显示）； 1 提供； 2 不提供
+    private String existShop;                                           // 是否近便利店           0 未知（不显示）； 1 是； 2 否
+    private String existParking;                                       // 是否提供停车场         0 未知（不显示）； 1 提供； 2 不提供
+    private String existGym;                                           // 是否有健身房           0 未知（不显示）； 1 提供； 2 不提供
+    private String existPlayground;                                       // 是否提供活动场地        0 未知（不显示）； 1 提供； 2 不提供
+    private String existSecurityMonitoring;                               // 是否提供视频防盗监控    0 未知（不显示）； 1 提供； 2 不提供
+    private String existBookBar;                                       // 是否提供书吧           0 未知（不显示）； 1 提供； 2 不提供
+    private String existClubBar;                                       // 是否提供吧台           0 未知（不显示）； 1 提供； 2 不提供
     // ########################### ApartmentType Ends ###########################
 
 
@@ -87,6 +87,7 @@ public class HouseDetail extends House {
 
     /**
      * 将sub-class多出的五个字段更新数据 (将house-object 更新为houseDetail-object)
+     *
      * @param houseDetail house对象
      */
     private void updateToLatestInfo(HouseDetail houseDetail) {
@@ -100,6 +101,7 @@ public class HouseDetail extends House {
 
     /**
      * 根据页面获取的datasource所构造的mapInfo 更新houseDetail对象的内部数据(房源基本信息)
+     *
      * @param mapInfo 由页面获取的datasource所构造的mapInfo
      */
     public void updateResidentBasicInfoFromMapData(LinkedHashMap<String, String> mapInfo) {
@@ -141,6 +143,7 @@ public class HouseDetail extends House {
 
     /**
      * 根据页面获取的datasource所构造的mapInfo 更新houseDetail对象的内部数据(房源基础设施信息)
+     *
      * @param mapInfo 由页面获取的datasource所构造的mapInfo
      */
     public void updateResidentFacilitiesInfoFromMapData(Map<String, String> mapInfo) {
@@ -180,6 +183,7 @@ public class HouseDetail extends House {
 
     /**
      * 由网页数据向数据库中添加时，处理数据一致的更新（列表页面的数据不全，进入到详情页面后，构造数据齐全的houseDetail对象 再向数据库更新）
+     *
      * @param houseDetail 由网页数据构造的houseDetail对象
      */
     public void updateToLatestResidentType(HouseDetail houseDetail) {

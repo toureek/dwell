@@ -5,7 +5,7 @@ import com.dwell.it.entities.House;
 import com.dwell.it.entities.HouseDetail;
 import com.dwell.it.enums.WebPageDataSourceEnum;
 import com.dwell.it.exception.InternalMethodInvokeException;
-import com.dwell.it.model.ModelFactory;
+import com.dwell.it.model.MiddleDataBuilderFactory;
 import com.dwell.it.utils.FileInputOutputUtils;
 import com.dwell.it.utils.MD5Generator;
 import com.dwell.it.utils.TextInputOutputUtils;
@@ -26,29 +26,20 @@ public class DataSourceParseHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSourceParseHelper.class);
 
-    /** 解释一下为什么在这里使用LinkedHashMap这个数据结构
-     *  1.基于数据源页面的数据量有限，只有100页数据，每页都有30条记录，并且这些记录是存在重复的，决定使用LinkedHashMap来存储.
-     *  2.使用LinkedHashMap存储时，url不直接作为key,而是先md5处理一下，使原始很长的url哈希为16字节大小，3000条数据的key任何电脑都可以读取
-     *  3.如果数据量大到上亿条时，不建议使用LinkedHashMap，因为Map有装载因子，虽然天然支持动态扩容(基于链表)，实际使用时内存占用更大
-     *  4.数据量上亿条时，可以将访问记录记录分散在10000个文件中，每个文件最大500Mb, 让URL先hash再对10000去模运算，得到的结果就是url应保存的文件编号
-     *  然后依次对10000个数据进行处理，这样即使单台机器内存只有1GB,也可以使用这种方法处理数据.(与load-balance的处理类似)
+    /**
+     * 解释一下为什么在这里使用LinkedHashMap这个数据结构
+     * 1.基于数据源页面的数据量有限，只有100页数据，每页都有30条记录，并且这些记录是存在重复的，决定使用LinkedHashMap来存储.
+     * 2.使用LinkedHashMap存储时，url不直接作为key,而是先md5处理一下，使原始很长的url哈希为16字节大小，3000条数据的key任何电脑都可以读取
+     * 3.如果数据量大到上亿条时，不建议使用LinkedHashMap，因为Map有装载因子，虽然天然支持动态扩容(基于链表)，实际使用时内存占用更大
+     * 4.数据量上亿条时，可以将访问记录记录分散在10000个文件中，每个文件最大500Mb, 让URL先hash再对10000去模运算，得到的结果就是url应保存的文件编号
+     * 然后依次对10000个数据进行处理，这样即使单台机器内存只有1GB,也可以使用这种方法处理数据.(与load-balance的处理类似)
      */
     private LinkedHashMap<String, String> detailPageUrlMap;  // 详情页面url数据集合
 
 
-    // 二级页面的HTML-CSS-DIV class elements tags: 住宅页面类型的BasicInfoTags
-    private static final String[] residenceTypeBasicInfoTags = new String[] {
-            "发布：", "入住：", "租期：", "看房：", "楼层：", "电梯：", "车位：", "用水：", "用电：", "燃气：", "采暖："
-    };
-
-    // 二级页面的HTML-CSS-DIV class elements tags: 住宅页面类型的FacilityInfoTags
-    private static final String[] residenceTypeFacilityInfoTags = new String[] {
-            "电视", "冰箱", "洗衣机", "空调", "热水器", "床", "暖气", "宽带", "衣柜", "天然气"
-    };
-
-
     /**
      * 处理爬虫当前获取下来的页面数据
+     *
      * @param page 当前页面
      */
     public void formatOriginalDataSourceOnWebPage(Page page) {
@@ -81,6 +72,7 @@ public class DataSourceParseHelper {
 
     /**
      * convert normal-page-source into html
+     *
      * @param page 当前页面
      * @return html
      */
@@ -97,11 +89,12 @@ public class DataSourceParseHelper {
     /**
      * 根据HTML源码 解析指定的数据区域数据集合 elementsList.
      * All elements objects which required in DVI.classes from HTML and Encapsulated in List.
+     *
      * @param webHTML html-source
      * @return elementsList
      */
     private List<Elements> convertHtmlTextToElements(String webHTML, String url) {
-        if (webHTML.length() == 0)    return null;
+        if (webHTML.length() == 0) return null;
 
         List<Elements> list = new LinkedList<>();
         String[] htmlTags = keyHtmlElementTags(url);
@@ -118,22 +111,24 @@ public class DataSourceParseHelper {
 
     /**
      * 根据当前获取页面page上 指定需要获取数据的位置 并返回其对应HTML-CSS-DVI标签
+     *
      * @param urlPath 当前页面
      * @return String[] htmlTags   抓取数据对象在HTML页面上的标签的字符串数组
      */
     private String[] keyHtmlElementTags(String urlPath) {
         if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
-            return residenceTypeHtmlElementsItemObjectTags();                           // 二级页面 住宅类型 有多个HTML标签
+            return MiddleDataBuilderFactory.buildResidenceTypeBasicInfoHtmlTags();  // 二级页面 住宅类型 有多个HTML标签
         } else if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.DATA_SOURCE_BASE_PAGE_PREFIX.toString())) {
-            return new String[] {WebPageDataSourceEnum.ITEM_OBJECT_TAG.toString()};     // 一级页面是列表  所以只有一个元素
+            return new String[]{WebPageDataSourceEnum.ITEM_OBJECT_TAG.toString()};  // 一级页面是列表  所以只有一个元素
         } else {
-            return new String[] {""};
+            return new String[]{""};
         }
     }
 
 
     /**
      * 格式化一级页面的数据源 保存在文件中并打印出来
+     *
      * @param elementsList 页面HTML中 需要的数据Tag标签元素集合
      */
     private void constructFirstClassPageData(List<Elements> elementsList) {
@@ -152,11 +147,12 @@ public class DataSourceParseHelper {
 
     /**
      * 根据web-html-tags 解析出一级列表页面上的HouseObjects
-     * @param elementsList  web-html-tags
+     *
+     * @param elementsList web-html-tags
      * @return houseArrayList
      */
     private ArrayList<House> parsedListPageContentAndPrepareDBRequirements(Elements elementsList) {
-        if (elementsList == null || elementsList.size() == 0)    return null;
+        if (elementsList == null || elementsList.size() == 0) return null;
 
         // 每一页的数据有30条，考虑到装载因子过大时会有hash散列冲突与性能问题，粗算让装载因子小于0.75，所以Map选择初始容量为40。
         ArrayList<House> houseArrayList = new ArrayList<>(30);
@@ -170,7 +166,7 @@ public class DataSourceParseHelper {
             if (!(detailPageUrlMap.containsValue(md5Key))) {
                 detailPageUrlMap.put(md5Key, url);
 
-                String liteUrlPath = url.replaceAll(WebPageDataSourceEnum.DATA_SOURCE_BASE_PAGE_PREFIX.toString(),"");
+                String liteUrlPath = url.replaceAll(WebPageDataSourceEnum.DATA_SOURCE_BASE_PAGE_PREFIX.toString(), "");
                 String[] titleAndMainImageURL = elementSelectForTitleAndMainImageURL(element);          // 标题描述+房屋1张图片URL
                 String[] basicLDKInfo = elementSelectForBasicInfo(element);                             // 房屋基本信息
                 String lastUpdatedTime = elementSelectForLastUpdatedDatetime(element);                  // 房屋发布时间
@@ -178,7 +174,7 @@ public class DataSourceParseHelper {
                 String[] priceAndPaymentTypeInfo = elementSelectForPriceAndPaymentType(element);        // 房屋费用信息
                 String providerName = elementSelectForOpearatorBrand(element);                          // 房屋所属运营品牌
 
-                House house = ModelFactory.buildFirstClassWebPageHouse(liteUrlPath,
+                House house = MiddleDataBuilderFactory.buildFirstClassWebPageHouse(liteUrlPath,
                         titleAndMainImageURL,
                         basicLDKInfo,
                         lastUpdatedTime,
@@ -198,8 +194,9 @@ public class DataSourceParseHelper {
 
     /**
      * 获取【详情页】的URL：  element.selectForLink()
+     *
      * @param element Element: element  each elementObject from elementsList
-     * @return  String: linkURL  点击当前item后 所要跳转到下一级页面的URL
+     * @return String: linkURL  点击当前item后 所要跳转到下一级页面的URL
      */
     private String elementSelectForNextPageLink(Element element) {
         Elements detailURL = element.select(WebPageDataSourceEnum.ITEM_TITLE_DESC_TAG.toString());     // 详情页面URL
@@ -215,18 +212,19 @@ public class DataSourceParseHelper {
 
     /**
      * 查询房屋标题描述 以及 详情页面URL
-     * @param element   Element: element  each elementObject from elementsList
-     * @return  String[] {title, imageURL}  返回两个元素的字符串数组，且第一个元素为房屋标题，后一个是房屋主图URL
+     *
+     * @param element Element: element  each elementObject from elementsList
+     * @return String[] {title, imageURL}  返回两个元素的字符串数组，且第一个元素为房屋标题，后一个是房屋主图URL
      */
     private static String[] elementSelectForTitleAndMainImageURL(Element element) {
         Elements wrapperObject = element.select(WebPageDataSourceEnum.ITEM_TITLE_DESC_TAG.toString());
-        String[] result = new String[] {"", ""};
+        String[] result = new String[]{"", ""};
         if (!(wrapperObject.isEmpty())) {
             Elements titleAndImageObject = wrapperObject.select(".lazyload");
             if (!(titleAndImageObject.isEmpty())) {
                 String fetchedTitleText = titleAndImageObject.attr("alt");
                 String fetchedImageURL = titleAndImageObject.attr("data-src");
-                result = new String[] {fetchedTitleText, fetchedImageURL};
+                result = new String[]{fetchedTitleText, fetchedImageURL};
             }
         }
         return result;
@@ -235,16 +233,16 @@ public class DataSourceParseHelper {
 
     /**
      * 查询到 elements.select(库存/城区信息 / 房屋面积、朝向、3DLKDesc)的信息
-     *
+     * <p>
      * 房屋面积、朝向、3DLKDesc
-     *                       |
-     *                       |——  房屋库存。   在HTML-DIV-CSS中的结构如上所示
+     * |
+     * |——  房屋库存。   在HTML-DIV-CSS中的结构如上所示
      * 但显示顺序是 1.库存/城区信息  2.房屋面积 3.朝向 4.3DLKDesc(一室一厅一卫)
      *
-     * @param element   Element: element  each elementObject from elementsList
-     * @return      String[] {a, b, c, d, e}       返回5个元素的字符串数组
-     *              分别对应 a.城区信息  b.房屋面积 c.朝向 d.1DLKDesc(一室一厅一卫) e.库存； 如果没有城区信息，库存显示在第一个位置
-     *
+     * @param element Element: element  each elementObject from elementsList
+     * @return String[] {a, b, c, d, e}       返回5个元素的字符串数组
+     * 分别对应 a.城区信息  b.房屋面积 c.朝向 d.1DLKDesc(一室一厅一卫) e.库存； 如果没有城区信息，库存显示在第一个位置
+     * <p>
      * PS:  DLKDesc是日本对房屋的描述情况(Dinner-LivingRoom-Kitchen)
      */
     private String[] elementSelectForBasicInfo(Element element) {
@@ -253,13 +251,13 @@ public class DataSourceParseHelper {
 
         Elements wrapperStockObject = element.select(WebPageDataSourceEnum.ITEM_BASIC_INFO_TAG.toString());
         if (wrapperStockObject.isEmpty()) {
-            return new String[] {cityZone, areaSize, aspect, descLDKInfo, stockInfo};
+            return new String[]{cityZone, areaSize, aspect, descLDKInfo, stockInfo};
         }
 
         String objText = wrapperStockObject.text();
         if (objText.length() > 0) {
             String[] itemsList = objText.split("/");
-            for (int i = 0; i < itemsList.length-1; i++) {
+            for (int i = 0; i < itemsList.length - 1; i++) {
                 if (itemsList[i].contains(WebPageDataSourceEnum.OBJECT_AREA_TAG.toString())) {
                     areaSize = itemsList[i].trim().length() > 0 ? itemsList[i].trim() : "";                   // area
                 } else if (itemsList[i].contains(WebPageDataSourceEnum.OBJECT_DKLs_TAG.toString())) {
@@ -279,14 +277,15 @@ public class DataSourceParseHelper {
         if (!(stockObj.isEmpty())) {
             stockInfo = stockObj.text().length() > 0 ? stockObj.text() : "";
         }
-        return new String[] {cityZone, areaSize, aspect, descLDKInfo, stockInfo};
+        return new String[]{cityZone, areaSize, aspect, descLDKInfo, stockInfo};
     }
 
 
     /**
      * 查询到房屋发布时间
-     * @param element   Element: element  each elementObject from elementsList
-     * @return          String: lastUpdatedTimeInfo
+     *
+     * @param element Element: element  each elementObject from elementsList
+     * @return String: lastUpdatedTimeInfo
      */
     private String elementSelectForLastUpdatedDatetime(Element element) {
         Elements lastUpdateTimeElement = element.select(WebPageDataSourceEnum.ITEM_LAST_UPDATED_TIME_TAG.toString());
@@ -300,8 +299,9 @@ public class DataSourceParseHelper {
 
     /**
      * 查询到房屋Tags信息
-     * @param element   Element: element  each elementObject from elementsList
-     * @return          String[] tagsInfo
+     *
+     * @param element Element: element  each elementObject from elementsList
+     * @return String[] tagsInfo
      */
     private String[] elementSelectForTagsInfo(Element element) {
         Elements tagsElement = element.select(WebPageDataSourceEnum.ITEM_TAGS_INFO_TAG.toString());
@@ -310,16 +310,17 @@ public class DataSourceParseHelper {
             if (tagsText.length() > 0) {
                 return tagsText.split(" ");
             }
-            return new String[] {""};
+            return new String[]{""};
         }
-        return new String[] {""};
+        return new String[]{""};
     }
 
 
     /**
      * 房屋费用信息 （金额+计价单位）
-     * @param element   Element: element  each elementObject from elementsList
-     * @return          String[] {price, paymentType}
+     *
+     * @param element Element: element  each elementObject from elementsList
+     * @return String[] {price, paymentType}
      */
     private String[] elementSelectForPriceAndPaymentType(Element element) {
         Elements priceElement = element.select(WebPageDataSourceEnum.ITEM_PRICE_AND_PAYMENT_TAG.toString());
@@ -329,16 +330,17 @@ public class DataSourceParseHelper {
             if (priceInfoAndPaymentTypeObj.length == 2) {
                 return priceInfoAndPaymentTypeObj;
             }
-            return new String[] {"", ""};
+            return new String[]{"", ""};
         }
-        return new String[] {"", ""};
+        return new String[]{"", ""};
     }
 
 
     /**
      * 查询到房屋所属运营品牌 （不是房屋自己的建筑开发商）
-     * @param element   Element: element  each elementObject from elementsList
-     * @return          String: brand  返回运营商品牌信息
+     *
+     * @param element Element: element  each elementObject from elementsList
+     * @return String: brand  返回运营商品牌信息
      */
     private String elementSelectForOpearatorBrand(Element element) {
         Elements brandElement = element.select(WebPageDataSourceEnum.ITEM_OPERATION_BRAND_TAG.toString());
@@ -352,37 +354,12 @@ public class DataSourceParseHelper {
     // ------------------------  Datasource on FirstClassWebPage ------------------------
     // ----------------------------------  Ends Here ----------------------------------
 
-
-    /**
-     * 获取二级页面 住宅类型 有多个HTML标签，并返回该HTML-Tag的集合
-     * @return String[] tagsHTML
-     */
-    private String[] residenceTypeHtmlElementsItemObjectTags() {
-        return new String[] {
-                WebPageDataSourceEnum.OBJECT_2ND_TITLE_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_ONLINE_DATE_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_IDENTIFIER_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_WRAPPER_BANNER_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_STARTER_PRICE_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_STARTER_PRICE_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_TAGS_LIST_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_SUB_TAGS_LIST_TAG.toString(),
-                WebPageDataSourceEnum.ITEM_2ND_OPERATOR_AVATAR_TAG.toString(),
-                WebPageDataSourceEnum.ITEM_2ND_CONTACT_NAME_TAG.toString(),
-                WebPageDataSourceEnum.ITEM_2ND_OPERATOR_TAG.toString(),
-                WebPageDataSourceEnum.ITEM_2ND_TEL_NUMBER_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_BASIC_INFO_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_FACILITIES_TAG.toString(),
-                WebPageDataSourceEnum.OBJECT_2ND_INTRODUCTION_TAG.toString()
-        };
-    }
-
-
     /**
      * 格式化并构造二级页面的数据源(HouseDetail Model) 并批量更新到数据库
+     *
      * @param elementsList 页面HTML中 需要的数据Tag标签元素集合
-     * @param urlPath 页面URL
-     * PS: 一级页面的数据 在获取后就直接存入数据库了，这里先根据detailUrl反向查到House(Model)，再将house(Model)扩展更新到HouseDetail(Model)
+     * @param urlPath      页面URL
+     *                     PS: 一级页面的数据 在获取后就直接存入数据库了，这里先根据detailUrl反向查到House(Model)，再将house(Model)扩展更新到HouseDetail(Model)
      */
     private void constructSecondClassPageDataAndSaveToDatabase(List<Elements> elementsList, String urlPath) {
         String shortLinkPath = TextInputOutputUtils.safeShortUrlWithoutBaseUrl(urlPath + "");
@@ -401,12 +378,13 @@ public class DataSourceParseHelper {
 
     /**
      * 解析并返回在二级页面（住宅类型）中，公寓对象的数据. 并在构造houseDetail对象后，在程序返回前，解决数据库中contactId的外键依赖问题
-     * @param elementsList  HTML对应元素的结果集合
-     * @param providerId the primary-key in t_providers
+     *
+     * @param elementsList HTML对应元素的结果集合
+     * @param providerId   the primary-key in t_providers
      * @return HouseDetail 二级页面的数据对象 （包含已解决contactId外键的数据）
      */
     private HouseDetail fetchedResidentItemAndFixDatabaseForeignKeyRequirments(List<Elements> elementsList, Integer providerId) {
-        if (elementsList == null || elementsList.isEmpty())    return null;
+        if (elementsList == null || elementsList.isEmpty()) return null;
 
         HouseDetail houseDetail = new HouseDetail();
         Contact contact = new Contact();
@@ -446,7 +424,7 @@ public class DataSourceParseHelper {
                 contact.setName(TextInputOutputUtils.safeTextContent(contactNameText));
             } else if (i == 10) {  // 联系人title
                 int length = objectList.text().length();
-                String contactTitleTagText = objectList.text().substring(0, (int)(length/2));
+                String contactTitleTagText = objectList.text().substring(0, (int) (length / 2));
                 contact.setTitle(TextInputOutputUtils.safeTextContent(contactTitleTagText));
             } else if (i == 12) {  // 房源基本情况（装修、楼层、朝向）
                 String basicInfosText = objectList.text();
@@ -480,9 +458,9 @@ public class DataSourceParseHelper {
     }
 
 
-
     /**
      * 将详情页面的数据 存入数据库 (因为在访问列表页面的时候，已经将数据插入过了，这里实际上时补充数据 SQL-Update语句)
+     *
      * @param houseDetail 要update的数据记录
      */
     private void saveHouseDetailObjectToDatabase(HouseDetail houseDetail) {
@@ -492,11 +470,12 @@ public class DataSourceParseHelper {
 
     /**
      * 解析二级页面情页面Banner的图片URL列表
+     *
      * @param element 每一个HTML父节点是content__article__slide__wrapper的元素
-     * @return  String[] 公寓详情页面Banner的图片URL列表
+     * @return String[] 公寓详情页面Banner的图片URL列表
      */
     private String[] parseElementObjectAndSelectForBannerURLs(Element element) {
-        if (element == null)    return new String[] {""};
+        if (element == null) return new String[]{""};
 
         List<String> list = new LinkedList<>();
         Elements objectList = element.select(WebPageDataSourceEnum.ITEM_2ND_BANNER_ITEM_TAG.toString());
@@ -508,14 +487,14 @@ public class DataSourceParseHelper {
     }
 
 
-
     /**
      * 获取二级页面上 指定的URL， 并返回这个URL
+     *
      * @param inputText 字符串文本
      * @return url
      */
     private String parseAvatarUrlFromHtmlTagSource(String inputText) {
-        if (inputText.isEmpty())    return "";
+        if (inputText.isEmpty()) return "";
 
         String text = TextInputOutputUtils.detectAndExtractFirstUrlToTheEnd(inputText);
         String result = text.replace(")", "");
@@ -528,20 +507,21 @@ public class DataSourceParseHelper {
      * 构造Map数据结构： 处理BasicInfoTags: 将字符串文本类型 转化为map
      * Before--> 发布：4天前 入住：随时入住 租期：6~12个月 看房：随时可看 楼层：3/32层 电梯：有 车位：租用车位 用水：商水 用电：商电 燃气：有 采暖：集中供暖
      * After--> {发布:4天前, 入住:随时入住, 租期:6~12个月, 看房:随时可看, 楼层:3/32层, 电梯:有, 车位:租用车位, 用水:商水, 用电:商电, 燃气:有, 采暖:集中供暖}
+     *
      * @param inputText 字符串文本
      * @return HashMap<String, String> map
      */
     private LinkedHashMap<String, String> buildResidenceTypeBasicInfoTags(String inputText) {
-        if (inputText.isEmpty())    return new LinkedHashMap<>();
+        if (inputText.isEmpty()) return new LinkedHashMap<>();
 
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
         String[] itemList = inputText.split(" ");
         String[] filterList = TextInputOutputUtils.removeEmptyElementFromStringArray(itemList);
-        if (filterList.length == 0)    return new LinkedHashMap<>();
+        if (filterList.length == 0) return new LinkedHashMap<>();
 
         for (int i = 0; i < filterList.length; i++) {
             String item = filterList[i];
-            String keyName = residenceTypeBasicInfoTags[i];
+            String keyName = MiddleDataBuilderFactory.residenceTypeBasicInfoTags[i];
             if (item.contains(keyName)) {
                 String finalKey = keyName.replace("：", "");
                 String value = item.replace(keyName, "");
@@ -554,18 +534,19 @@ public class DataSourceParseHelper {
 
     /**
      * 处理住宅详情页面 基础设施标签显示状态的集合 转化为map
+     *
      * @param element HTML对应元素
      * @return {"电视"：1, "冰箱"：1, "洗衣机"：1, "空调"：0, "热水器"：0, "床"：0, "暖气"：1, "宽带"：1, "衣柜"：0, "天然气"：1} 的值
      */
     private LinkedHashMap<String, String> buildResidenceTypeFacilitiesInfoTags(Element element) {
-        if (element == null)    return new LinkedHashMap<>();
+        if (element == null) return new LinkedHashMap<>();
 
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        String[] keysList = residenceTypeFacilitiesHtmlTags();
+        String[] keysList = MiddleDataBuilderFactory.buildResidenceTypeFacilitiesHtmlTags();
         Random random = new Random();
         for (int index = 0; index < keysList.length; index++) {
             String tagKey = keysList[index];
-            String finalKey = residenceTypeFacilityInfoTags[index];
+            String finalKey = MiddleDataBuilderFactory.residenceTypeFacilityInfoTags[index];
             // String result = (element.select(tagKey).isEmpty()) ? "1" : "2";
             // map.put(finalKey, result);
             // TODO: 将数据人为的变更为随机出现， 解决完获取js动态数据后再修改此处
@@ -573,26 +554,6 @@ public class DataSourceParseHelper {
             map.put(finalKey, tmp + "");
         }
         return map;
-    }
-
-
-    /**
-     * 二级页面 住宅类型的配套设备标签
-     * @return 住宅类型的配套设备标签的字符串数组
-     */
-    private String[] residenceTypeFacilitiesHtmlTags() {
-        return new String[] {
-                WebPageDataSourceEnum.TELEVISION_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.REFRIGERATOR_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.WASHING_MACHINE_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.AIR_CONDITIONER_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.WATER_HEATER_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.BED_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.HEATING_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.WIFI_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.WARDROBE_HIDDEN_TAG.toString(),
-                WebPageDataSourceEnum.GAS_HIDDEN_TAG.toString()
-        };
     }
 
 }

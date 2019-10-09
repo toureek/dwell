@@ -10,7 +10,7 @@ drop table t_providers;
 drop table t_contacts;
 drop table t_houses;
 
-CREATE TABLE `t_contacts` (
+create TABLE `t_contacts` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL DEFAULT '',
   `title` varchar(30) NOT NULL DEFAULT '',
@@ -22,7 +22,7 @@ CREATE TABLE `t_contacts` (
 
 
 
-CREATE TABLE `t_providers` (
+create TABLE `t_providers` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL,
   `descriptions` varchar(500) NOT NULL DEFAULT ' ',
@@ -31,7 +31,7 @@ CREATE TABLE `t_providers` (
 
 
 
-CREATE TABLE `t_houses` (
+create TABLE `t_houses` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `provider_id` int(11) NOT NULL,
   `contact_id` int(11),

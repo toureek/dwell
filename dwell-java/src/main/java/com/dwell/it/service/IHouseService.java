@@ -9,7 +9,9 @@ public interface IHouseService {
 
     // Basic single-ops
     boolean addNewHouseOne(House house);
+
     boolean modifyHouseDetailOne(HouseDetail houseDetail);
+
     boolean removeHouseById(int id);
 
 

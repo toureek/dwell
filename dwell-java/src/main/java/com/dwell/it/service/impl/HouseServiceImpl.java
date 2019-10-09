@@ -93,12 +93,10 @@ public class HouseServiceImpl implements IHouseService {
     }
 
 
-
-
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public boolean batchAddNewHouseList(List<House> list) {
-        if (list == null || list.size() == 0)    throw new DBManipulateException("没有要插入的数据");
+        if (list == null || list.size() == 0) throw new DBManipulateException("没有要插入的数据");
 
         try {
             if (iHouseDao.batchInsertNewHouseList(list)) {
@@ -109,7 +107,6 @@ public class HouseServiceImpl implements IHouseService {
             throw new DBManipulateException(String.format("本次批处理插入数据失败: %s", ex.getMessage()));
         }
     }
-
 
 
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -125,7 +122,6 @@ public class HouseServiceImpl implements IHouseService {
             throw new DBManipulateException("这条houseItem detailPageURL 查询为空");
         }
     }
-
 
 
     // 二级页面的数据以来逻辑

@@ -28,7 +28,7 @@ public class DataSourceConfiguration {
     private String dbPassword;
 
 
-    @Bean(name="dataSource")
+    @Bean(name = "dataSource")
     public ComboPooledDataSource createDataSource() throws PropertyVetoException {
         ComboPooledDataSource dataSource = new ComboPooledDataSource();
         dataSource.setDriverClass(jdbcDriver);

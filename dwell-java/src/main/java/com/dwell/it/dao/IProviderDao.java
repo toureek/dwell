@@ -8,8 +8,11 @@ public interface IProviderDao {
 
     //  Basic CRUD Operations
     int insertNewProvider(Provider provider);
+
     Provider fetchSingleProviderById(int id);
+
     int updateProvider(Provider provider);
+
     int deleteProviderById(int id);
 
 

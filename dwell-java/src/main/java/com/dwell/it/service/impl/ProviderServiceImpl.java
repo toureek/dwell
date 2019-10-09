@@ -48,7 +48,7 @@ public class ProviderServiceImpl implements IProviderService {
 
         try {
             Provider provider = iProviderDao.fetchSingleProviderById(id);
-            if (provider != null)    return provider;
+            if (provider != null) return provider;
 
             throw new MessageRuntimeException("没有查询到该供应商ID对应的记录");
         } catch (Exception ex) {
@@ -96,7 +96,6 @@ public class ProviderServiceImpl implements IProviderService {
             throw new DBManipulateException(String.format("删除这条provider数据失败: %s", ex.getMessage()));
         }
     }
-
 
 
     @Transactional(propagation = Propagation.SUPPORTS)

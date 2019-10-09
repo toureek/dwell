@@ -6,8 +6,11 @@ public interface IProviderService {
 
     // Basic
     boolean addNewProviderOne(Provider provider);
+
     Provider queryForSingleProvidertById(int id);
+
     boolean modifyProvider(Provider provider);
+
     boolean removeProviderById(int id);
 
 

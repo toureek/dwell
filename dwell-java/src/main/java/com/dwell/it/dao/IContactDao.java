@@ -8,8 +8,11 @@ public interface IContactDao {
 
     //  Basic CRUD Operations
     int insertNewContact(Contact contact);
+
     int updateContact(Contact contact);
+
     int deleteContactById(int id);
+
     Contact fetchSingleContactById(int id);
 
 }

@@ -29,7 +29,7 @@ public class SessionFactoryConfiguration {
     private DataSource dataSource;
 
 
-    @Bean(name="sqlSessionFactory")
+    @Bean(name = "sqlSessionFactory")
     public SqlSessionFactoryBean createSqlSessionFactoryBean() throws IOException {
         SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
         sessionFactoryBean.setConfigLocation(new ClassPathResource(mybatisConfigFilePath));

@@ -20,16 +20,20 @@ public class Contact {
 
     private String avatar;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private String name;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private String title;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private String telephone;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private Integer providerId;
 
 

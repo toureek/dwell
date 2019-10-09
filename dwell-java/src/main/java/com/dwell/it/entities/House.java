@@ -48,7 +48,8 @@ public class House {
 
     /**
      * constructor for standard fetching api
-     * @param providerId  provider表的外键
+     *
+     * @param providerId provider表的外键
      */
     public House(Integer providerId, String title, String detailPageUrl, String area, String aspect, String livingDiningKitchenInfo, String stockCount, String mainImageUrl, String cityZone, String infoTags, String lastUpdateTime, String tradePrice, String tradePriceUnit) {
         this.providerId = providerId;
@@ -86,5 +87,4 @@ public class House {
         this.geoInfo = geoInfo;
     }
 
-    
 }

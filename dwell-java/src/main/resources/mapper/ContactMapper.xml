@@ -3,16 +3,16 @@
 
 <mapper namespace="com.dwell.it.dao.IContactDao">
 
-    <resultMap id="contactResultMap" type="com.dwell.it.entities.Contact" >
-        <id column="id" property="id" jdbcType="INTEGER" />
-        <result column="avatar" property="avatar" jdbcType="VARCHAR" />
-        <result column="name" property="name" jdbcType="VARCHAR" />
-        <result column="title" property="title" jdbcType="VARCHAR" />
-        <result column="telephone" property="telephone" jdbcType="VARCHAR" />
-        <result column="provider_id" property="providerId" jdbcType="INTEGER" />
+    <resultMap id="contactResultMap" type="com.dwell.it.entities.Contact">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="telephone" property="telephone" jdbcType="VARCHAR"/>
+        <result column="provider_id" property="providerId" jdbcType="INTEGER"/>
     </resultMap>
 
-    <sql id="Contact_Full_Column_List" >
+    <sql id="Contact_Full_Column_List">
         id, avatar, name, title, telephone, provider_id
     </sql>
 
@@ -26,7 +26,8 @@
     </insert>
 
     <select id="fetchSingleContactById" resultType="com.dwell.it.entities.Contact">
-        select <include refid="Contact_Full_Column_List" />
+        select
+        <include refid="Contact_Full_Column_List"/>
         from t_contacts
         where id = #{id}
     </select>

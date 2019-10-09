@@ -23,7 +23,6 @@ public class ProviderServiceImplTest {
     private IProviderService iProviderService;
 
 
-
     @Test(expected = MessageRuntimeException.class)
     public void testQueryForSingleEmptyProvidertById() {
         iProviderService.queryForSingleProvidertById(-11);

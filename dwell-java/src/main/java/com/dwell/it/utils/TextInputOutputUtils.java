@@ -21,6 +21,9 @@ public class TextInputOutputUtils {
             Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 
 
+    private static final String numberAndLettersRegularEx = "[^a-z^A-Z^0-9]";
+
+
     /**
      * 安全文本
      * @param inputText 入参文本
@@ -115,6 +118,20 @@ public class TextInputOutputUtils {
             }
         }
         return list.toArray(new String[list.size()]);
+    }
+
+
+    /**
+     * 获取一串文本中 所有的数组和字母
+     * @param inputText 输入字符串
+     * @return result
+     */
+    public static String fetchNumbersAndLettersFromStringText(String inputText) {
+        if (inputText == null || inputText.isEmpty())    return "";
+
+        Pattern pattern = Pattern.compile(numberAndLettersRegularEx);
+        Matcher matcher = pattern.matcher(inputText);
+        return matcher.replaceAll("").trim();
     }
 
 }

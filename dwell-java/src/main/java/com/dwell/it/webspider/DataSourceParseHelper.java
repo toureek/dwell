@@ -3,15 +3,26 @@ package com.dwell.it.webspider;
 import com.dwell.it.entities.Contact;
 import com.dwell.it.entities.House;
 import com.dwell.it.entities.HouseDetail;
+import com.dwell.it.enums.HttpInteractiveEnum;
 import com.dwell.it.enums.WebPageDataSourceEnum;
 import com.dwell.it.exception.InternalMethodInvokeException;
 import com.dwell.it.model.MiddleDataBuilderFactory;
+import com.dwell.it.model.ajax.AjaxModel;
+import com.dwell.it.model.ajax.ContactModel;
 import com.dwell.it.utils.FileInputOutputUtils;
 import com.dwell.it.utils.MD5Generator;
 import com.dwell.it.utils.TextInputOutputUtils;
 import com.dwell.it.utils.database.DatabaseStorageUtils;
+import com.google.gson.Gson;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
@@ -20,6 +31,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 public class DataSourceParseHelper {
@@ -35,6 +47,8 @@ public class DataSourceParseHelper {
      * 然后依次对10000个数据进行处理，这样即使单台机器内存只有1GB,也可以使用这种方法处理数据.(与load-balance的处理类似)
      */
     private LinkedHashMap<String, String> detailPageUrlMap;  // 详情页面url数据集合
+
+    private static final int HTTP_REQUEST_SUCCESSFULLY_STATUS_CODE = 200;
 
 
     /**
@@ -399,7 +413,20 @@ public class DataSourceParseHelper {
                 String result = TextInputOutputUtils.fetchDateTimeYYMMDDFromStringText(objectList.text());
                 houseDetail.setPublishDateTime(TextInputOutputUtils.safeTextContent(result));
             } else if (i == 2) {
-                // TODO: Ajax Request for Telephone-Numbers
+
+                String residenceNumberText = TextInputOutputUtils.fetchNumbersAndLettersFromStringText(objectList.text());
+                houseDetail.setIdentifier(TextInputOutputUtils.safeTextContent(residenceNumberText));
+                if (residenceNumberText.length() > 0) {
+                    String telephone = fetchPhoneNumberByInvokingAjaxRequest(residenceNumberText);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+                        String runningMethodName = Thread.currentThread().getStackTrace()[1].getMethodName();
+                        logger.error("error-here: " + runningMethodName + e.getMessage());   // 只记录Exception
+                    } finally {
+                        contact.setTelephone(TextInputOutputUtils.safeTextContent(telephone));
+                    }
+                }
             } else if (i == 3) {
                 Element object = objectList.first();  // 只返回一个元素
                 String[] bannerURLList = parseElementObjectAndSelectForBannerURLs(object);
@@ -554,6 +581,49 @@ public class DataSourceParseHelper {
             map.put(finalKey, tmp + "");
         }
         return map;
+    }
+
+
+    // ------------------------  构造获取Ajax请求并获取数据 ------------------------
+    /**
+     * 通过houseCodes去请求Ajax 获取电话号码
+     *
+     * @param houseCodes Ajax请求参数中 对应的houseCode值
+     * @return telephoneNumbers
+     */
+    private String fetchPhoneNumberByInvokingAjaxRequest(String houseCodes) {
+        String requestURL = String.format("%s?%s=%s", HttpInteractiveEnum.AJAX_REQUEST_URL_PREFIX.toString(),
+                HttpInteractiveEnum.AJAX_HOUSE_CODE_PARAMS_NAME.toString(), houseCodes);
+
+        /**
+         * The most important is here:   disableCookieManagement().useSystemProperties()
+         * TODO: 带着cookie请求url取不到数据 直接忽略cookie! Find out Root-Cause!
+         */
+        CloseableHttpClient httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build();
+        HttpUriRequest getRequest = new HttpGet(requestURL);
+        getRequest.addHeader(HttpHeaders.ACCEPT, HttpInteractiveEnum.HTTP_RESPONSE_FORMAT.toString());
+
+        String result = "";
+        try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest)) {
+            String content = EntityUtils.toString(httpResponse.getEntity());
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            if (statusCode == HTTP_REQUEST_SUCCESSFULLY_STATUS_CODE) {
+                Gson jsonHelper = new Gson();
+                AjaxModel ajax = jsonHelper.fromJson(content, AjaxModel.class);
+                HashMap<String, HashMap<String, ContactModel>> wrapperMap = ajax.getData();
+                HashMap<String, ContactModel> objectMap = wrapperMap.get(houseCodes);
+                ContactModel contact = objectMap.get(houseCodes);
+                boolean isFoundSplitChar = contact.getTp_number().contains(",");
+                if (isFoundSplitChar) {
+                    result = contact.getTp_number().replace(",", "转");
+                } else {
+                    result = contact.getTp_number();
+                }
+            }
+        } catch (IOException ex) {
+            logger.error(HttpInteractiveEnum.HTTP_REQUEST_FAILED_MESSAGE.toString() + ex.getMessage() + "");
+        }
+        return result;
     }
 
 }

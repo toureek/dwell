@@ -1,6 +1,8 @@
 package com.dwell.it.webspider;
 
+import com.dwell.it.entities.Contact;
 import com.dwell.it.entities.House;
+import com.dwell.it.entities.HouseDetail;
 import com.dwell.it.enums.WebPageDataSourceEnum;
 import com.dwell.it.exception.InternalMethodInvokeException;
 import com.dwell.it.model.ModelFactory;
@@ -10,8 +12,7 @@ import com.dwell.it.utils.TextInputOutputUtils;
 import com.dwell.it.utils.database.DatabaseStorageUtils;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
-import org.jsoup.Jsoup
-        ;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -56,7 +57,8 @@ public class DataSourceParseHelper {
         }
 
         if (urlPath.startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
-            // TODO: 详情页面解析
+            constructSecondClassPageDataAndSaveToDatabase(elementsList, urlPath);
+
         } else {
             constructFirstClassPageData(elementsList);
             try {
@@ -112,7 +114,7 @@ public class DataSourceParseHelper {
      */
     private String[] keyHtmlElementTags(String urlPath) {
         if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
-            return new String[] {""};    // TODO: 二级页面原始节点tag
+            return residenceTypeHtmlElementsItemObjectTags();                           // 二级页面 住宅类型 有多个HTML标签
         } else if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.DATA_SOURCE_BASE_PAGE_PREFIX.toString())) {
             return new String[] {WebPageDataSourceEnum.ITEM_OBJECT_TAG.toString()};     // 一级页面是列表  所以只有一个元素
         } else {
@@ -338,5 +340,71 @@ public class DataSourceParseHelper {
         return "";
     }
 
-    
+    // ------------------------  Datasource on FirstClassWebPage ------------------------
+    // ----------------------------------  Ends Here ----------------------------------
+
+
+    /**
+     * 获取二级页面 住宅类型 有多个HTML标签，并返回该HTML-Tag的集合
+     * @return String[] tagsHTML
+     */
+    private String[] residenceTypeHtmlElementsItemObjectTags() {
+        return new String[] {
+                WebPageDataSourceEnum.OBJECT_2ND_TITLE_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_ONLINE_DATE_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_IDENTIFIER_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_WRAPPER_BANNER_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_STARTER_PRICE_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_STARTER_PRICE_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_TAGS_LIST_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_SUB_TAGS_LIST_TAG.toString(),
+                WebPageDataSourceEnum.ITEM_2ND_OPERATOR_AVATAR_TAG.toString(),
+                WebPageDataSourceEnum.ITEM_2ND_CONTACT_NAME_TAG.toString(),
+                WebPageDataSourceEnum.ITEM_2ND_OPERATOR_TAG.toString(),
+                WebPageDataSourceEnum.ITEM_2ND_TEL_NUMBER_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_BASIC_INFO_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_FACILITIES_TAG.toString(),
+                WebPageDataSourceEnum.OBJECT_2ND_INTRODUCTION_TAG.toString()
+        };
+    }
+
+
+    /**
+     * 格式化并构造二级页面的数据源(HouseDetail Model) 并批量更新到数据库
+     * @param elementsList 页面HTML中 需要的数据Tag标签元素集合
+     * @param urlPath 页面URL
+     * PS: 一级页面的数据 在获取后就直接存入数据库了，这里先根据detailUrl反向查到House(Model)，再将house(Model)扩展更新到HouseDetail(Model)
+     */
+    private void constructSecondClassPageDataAndSaveToDatabase(List<Elements> elementsList, String urlPath) {
+        String shortLinkPath = TextInputOutputUtils.safeShortUrlWithoutBaseUrl(urlPath + "");
+        House house = DatabaseStorageUtils.searchingTargetHouseByPageURL(shortLinkPath);
+        HouseDetail houseDetail = new HouseDetail(house);
+        HouseDetail fetchedHouseDetail;
+
+        if (urlPath.toLowerCase().startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {  // 二级页面 住宅类型
+            fetchedHouseDetail = fetchedResidentItemAndFixDatabaseForeignKeyRequirments(elementsList, house.getProviderId());
+            houseDetail.updateToLatestResidentType(fetchedHouseDetail);
+            System.out.println(fetchedHouseDetail);
+            // TODO: 将最终构造完成的数据 批量修改进入数据库
+        }
+    }
+
+
+    /**
+     * 解析并返回在二级页面（住宅类型）中，公寓对象的数据. 并在构造houseDetail对象后，在程序返回前，解决数据库中contactId的外键依赖问题
+     * @param elementsList  HTML对应元素的结果集合
+     * @param providerId the primary-key in t_providers
+     * @return HouseDetail 二级页面的数据对象 （包含已解决contactId外键的数据）
+     */
+    private HouseDetail fetchedResidentItemAndFixDatabaseForeignKeyRequirments(List<Elements> elementsList, Integer providerId) {
+        if (elementsList == null || elementsList.isEmpty())    return null;
+
+        HouseDetail houseDetail = new HouseDetail();
+        Contact contact = new Contact();
+        contact.setProviderId(providerId);  // TODO: ProviderId is the foreign-key
+
+        return houseDetail;
+    }
+
+
 }

@@ -1,7 +1,9 @@
 package com.dwell.it.webspider;
 
+import com.dwell.it.enums.DataSingleton;
 import com.dwell.it.enums.WebPageDataSourceEnum;
 import com.dwell.it.exception.InternalMethodInvokeException;
+import com.dwell.it.utils.FileInputOutputUtils;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
@@ -11,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static org.apache.http.client.config.CookieSpecs.IGNORE_COOKIES;
 
@@ -33,15 +37,29 @@ public class CrawlerConfigHelper {
      */
     public void setUpWebSpiderConfigAndStartCrawlerService() throws InternalMethodInvokeException {
         CrawlConfig config = setUpCrawlerConfiguration();
+        try {  // 在一级页面请求完成之后 调整爬取页面数量的config 继续去请求二级页面的数据源
+            try {
+                CrawlController firstController = setUpCrawlerController(config);
+                if (firstController == null)    return;
 
-        try {
-            CrawlController firstController = setUpCrawlerController(config);
-            if (firstController == null)    return;
+                addFirstClassWebPageDataSourceUrl(firstController);
+                firstController.start(MyWebCrawler.class, NUMBER_OF_CRAWLERS);
+            } finally {
+                String fileName = WebPageDataSourceEnum.OUTPUT_FILENAME.toString();
+                List<String> fetchedURLsList = FileInputOutputUtils.fetchedEachLineOfContentFromTextFile(fileName);
+                DataSingleton.INSTANCE.setRequestURLsList(fetchedURLsList);
+                config.setMaxPagesToFetch(DataSingleton.INSTANCE.getRequestURLsList().size());
+            }
 
-            addFirstClassWebPageDataSourceUrl(firstController);
-            firstController.start(MyWebCrawler.class, NUMBER_OF_CRAWLERS);
+            CrawlController secondController = setUpCrawlerController(config);
+            for (String url : DataSingleton.INSTANCE.getRequestURLsList()) {  // 只获取住宅类型的数据
+                if (url.toLowerCase().startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
+                    secondController.addSeed(url);
+                }
+            }
+            secondController.start(MyWebCrawler.class, NUMBER_OF_CRAWLERS);
         } finally {
-            logger.info("\n-----------   All Crawler's jobs are finished  一级页面请求完成   -----------");
+            logger.info("\n-----------   All Crawler's jobs are finished  -----------");
         }
     }
 

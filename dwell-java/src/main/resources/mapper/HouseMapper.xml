@@ -155,17 +155,22 @@
             #{house.tradePriceUnit})
         </foreach>
     </insert>
-
     <!-- SQLMapper Batch-Operations Ends -->
 
 
     <!-- ForeignKey Handler Starts -->
-
     <select id="searchTargetHouseByTitleAndURL" resultMap="houseBaseResultMap">
         select <include refid="House_ListPage_Column_List" /> from t_houses
         where title=#{houseTitle} and detail_page_url=#{detailPageUrl}
     </select>
-
     <!-- ForeignKey Handler Ends -->
+
+
+    <!-- Handle with data-dependency on record in database Starts  -->
+    <select id="searchHousesByPageURL" resultMap="houseBaseResultMap">
+        select <include refid="House_ListPage_Column_List" /> from t_houses
+        where detail_page_url=#{url}
+    </select>
+    <!-- Handle with data-dependency on record in database Ends  -->
 
 </mapper>

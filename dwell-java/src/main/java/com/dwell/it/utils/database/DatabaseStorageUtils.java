@@ -1,8 +1,6 @@
 package com.dwell.it.utils.database;
 
-import com.dwell.it.entities.Contact;
 import com.dwell.it.entities.House;
-import com.dwell.it.entities.HouseDetail;
 import com.dwell.it.entities.Provider;
 import com.dwell.it.exception.DBManipulateException;
 import com.dwell.it.exception.InternalMethodInvokeException;
@@ -87,4 +85,16 @@ public class DatabaseStorageUtils {
         return databaseStorageUtils.iProviderService.isAllowedInsertNewOne(provider.getName());
     }
 
+
+
+    /**
+     * 只处理数据库中已存在的数据(由列表页面获取并存入数据库的)， 这里是反向查询(由url，反向查询house)
+     * @param url 详情页面url
+     * @return 返回一级页面的数据类型 house对象
+     */
+    public static House searchingTargetHouseByPageURL(String url) {
+        if (url == null || url.length() == 0)    return null;
+
+        return databaseStorageUtils.iHouseService.findTargetHouseByPageUrl(url);
+    }
 }

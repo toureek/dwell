@@ -118,7 +118,35 @@ public class HouseServiceImpl implements IHouseService {
         if (detailPageURL == null || detailPageURL.trim().length() == 0) {
             throw new DBManipulateException("这条houseItem detailPageURL条件为空");
         }
-        return iHouseDao.searchTargetHouseByTitleAndURL(houseTitle, detailPageURL) == null;
+
+        try {
+            return iHouseDao.searchTargetHouseByTitleAndURL(houseTitle, detailPageURL) == null;
+        } catch (Exception ex) {
+            throw new DBManipulateException("这条houseItem detailPageURL 查询为空");
+        }
+    }
+
+
+
+    // 二级页面的数据以来逻辑
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public House findTargetHouseByPageUrl(String pageURL) {
+        if (pageURL == null || pageURL.length() == 0) {
+            throw new DBManipulateException("这条house记录的 detailPageURL条件为空");
+        }
+
+        try {
+            List<House> list = iHouseDao.searchHousesByPageURL(pageURL);
+            if (list.size() > 0) {
+                House house = list.get(0);
+                return house;
+            } else {
+                throw new DBManipulateException(String.format("没有找到该url对应的记录"));
+            }
+        } catch (Exception ex) {
+            throw new DBManipulateException(String.format("没有找到该url对应的记录: %s", ex.getMessage()));
+        }
     }
 
 }

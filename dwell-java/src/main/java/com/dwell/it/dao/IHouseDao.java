@@ -24,4 +24,6 @@ public interface IHouseDao {
     // ForeignKey Handler
     House searchTargetHouseByTitleAndURL(@Param("houseTitle") String houseTitle,
                                          @Param("detailPageUrl") String detailPageUrl);
+
+    List<House> searchHousesByPageURL(@Param("url") String url);  // 由url反向查询house 返回的是列表页面house对象 不是houseDetail
 }

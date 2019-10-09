@@ -476,7 +476,7 @@ public class DataSourceParseHelper {
 	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_202]
                  */
 
-                if (contact.getTitle().length() > 0 && objElement.text().length() > 0) {
+                if (contact.getTitle() != null && (contact.getTitle().length() > 0) && (objElement.text().length() > 0)) {
                     String descriptions = objElement.text().replace(WebPageDataSourceEnum.TEXT_WILL_BE_REMOVED_C.toString(), "")
                             .replace(contact.getTitle(), "");
                     houseDetail.setHouseDescription(descriptions.length() > 0 ? descriptions : "...");

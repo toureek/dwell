@@ -2,6 +2,7 @@ package com.dwell.it.service;
 
 import com.dwell.it.entities.House;
 import com.dwell.it.entities.HouseDetail;
+import com.github.pagehelper.Page;
 
 import java.util.List;
 
@@ -36,5 +37,10 @@ public interface IHouseService {
     // Excel
     List<House> makeHouseAddressShorter(List<House> houseList);
 
+
+    // Paging (MyBatis-Paging)
+    Page<House> queryHousesByPaging(int pageNumber, int pageSize, String whereConditionSql);
+
+    Integer queryTotalQualifiedHousesCountByCondition(String whereConditionSql);
 
 }

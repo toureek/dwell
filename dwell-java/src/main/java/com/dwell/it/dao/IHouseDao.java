@@ -2,6 +2,7 @@ package com.dwell.it.dao;
 
 import com.dwell.it.entities.House;
 import com.dwell.it.entities.HouseDetail;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -37,5 +38,11 @@ public interface IHouseDao {
     List<House> fetchExistedAddressQualifiedHouseListWithinGeo();
 
     boolean batchUpdateHouseGeoInfo(@Param("list") List<House> list);  // Batch Update after fetch coordinates in Amap-SDK
+
+
+    // Paging (MyBatis-Paging)
+    Page<House> fetchingHousesListPageByPagingCondition(@Param("whereConditionSql") String whereConditionSql);
+
+    Integer fetchTotalHousesCountByCondition(@Param("whereConditionSql") String whereConditionSql);
 
 }

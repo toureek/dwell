@@ -205,4 +205,19 @@
     </update>
 
 
+
+    <!-- Paging Data-->
+    <select id="fetchingHousesListPageByPagingCondition" resultMap="houseBaseResultMap">
+        select id, provider_id, title, detail_page_url, area, aspect, living_dining_kitchen_info, stock_count,
+        main_image_url,
+        city_zone, info_tags, last_update_time, trade_price, trade_price_unit, confirm_apartment_type, geo_info
+        from t_houses ${whereConditionSql}
+    </select>
+
+
+    <select id="fetchTotalHousesCountByCondition" resultType="int">
+        select count(*) from t_houses ${whereConditionSql}
+    </select>
+
+
 </mapper>

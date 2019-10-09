@@ -6,6 +6,8 @@ import com.dwell.it.entities.HouseDetail;
 import com.dwell.it.exception.DBManipulateException;
 import com.dwell.it.exception.MessageRuntimeException;
 import com.dwell.it.service.IHouseService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -210,4 +212,49 @@ public class HouseServiceImpl implements IHouseService {
         return resultList;
     }
 
+
+    /**
+     * @param pageNumber        当前页数
+     * @param pageSize          分页大小
+     * @param whereConditionSql 分页查询语句
+     * @return 分页的数据列表
+     */
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public Page<House> queryHousesByPaging(int pageNumber, int pageSize, String whereConditionSql) {
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageSize < 1) pageSize = 1;
+
+        try {
+            PageHelper.startPage(pageNumber, pageSize);
+            Page<House> pageList = iHouseDao.fetchingHousesListPageByPagingCondition(whereConditionSql);
+            if (pageList.size() > 0) {
+                return pageList;
+            }
+            throw new MessageRuntimeException("没有符合条件的房屋信息");
+        } catch (Exception ex) {
+            throw new MessageRuntimeException("没有符合条件的房屋信息");
+        }
+    }
+
+
+    /**
+     * 查询符合App API条件的房源总数
+     *
+     * @param whereConditionSql whereSQL
+     * @return 查询符合App API条件的房源总数
+     */
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public Integer queryTotalQualifiedHousesCountByCondition(String whereConditionSql) {
+        try {
+            Integer count = iHouseDao.fetchTotalHousesCountByCondition(whereConditionSql);
+            if (count > 0) {
+                return count;
+            }
+            throw new MessageRuntimeException("暂无房屋数据");
+        } catch (Exception ex) {
+            throw new MessageRuntimeException("暂无房屋数据");
+        }
+    }
 }

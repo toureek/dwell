@@ -99,3 +99,22 @@ create TABLE `t_houses` (
 
 select * from t_houses;
 select * from t_providers;
+
+
+
+
+
+select id from t_houses
+ where geo_info != '0,0' and geo_info != ''
+        and (geo_info < '107' or geo_info > '110')
+            and confirm_apartment_type = 2
+                and LENGTH(city_zone) > 5;
+
+delete from t_houses where id in (
+	select * from (
+		(select id from t_houses where geo_info != '0,0' and geo_info != '' and (geo_info < '107' or geo_info > '110'))
+	) as subSelect
+);
+
+
+

@@ -2,6 +2,7 @@ package com.dwell.it.utils;
 
 import com.dwell.it.enums.WebPageDataSourceEnum;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,6 +97,24 @@ public class TextInputOutputUtils {
             return inputText.substring(matchStart, matchEnd);
         }
         return "";
+    }
+
+
+    /**
+     * 移除String[]中所有的空租字符串元素（""）
+     * @param inputList 字符串数组
+     * @return 移除空字符串后的String[]
+     */
+    public static String[] removeEmptyElementFromStringArray(String[] inputList) {
+        if (inputList == null || inputList.length == 0)    return new String[] {};
+
+        List<String> list = new LinkedList<>();
+        for (String item : inputList) {
+            if (item.length() > 0) {
+                list.add(item);
+            }
+        }
+        return list.toArray(new String[list.size()]);
     }
 
 }

@@ -20,10 +20,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class DataSourceParseHelper {
 
@@ -37,6 +34,17 @@ public class DataSourceParseHelper {
      *  然后依次对10000个数据进行处理，这样即使单台机器内存只有1GB,也可以使用这种方法处理数据.(与load-balance的处理类似)
      */
     private LinkedHashMap<String, String> detailPageUrlMap;  // 详情页面url数据集合
+
+
+    // 二级页面的HTML-CSS-DIV class elements tags: 住宅页面类型的BasicInfoTags
+    private static final String[] residenceTypeBasicInfoTags = new String[] {
+            "发布：", "入住：", "租期：", "看房：", "楼层：", "电梯：", "车位：", "用水：", "用电：", "燃气：", "采暖："
+    };
+
+    // 二级页面的HTML-CSS-DIV class elements tags: 住宅页面类型的FacilityInfoTags
+    private static final String[] residenceTypeFacilityInfoTags = new String[] {
+            "电视", "冰箱", "洗衣机", "空调", "热水器", "床", "暖气", "宽带", "衣柜", "天然气"
+    };
 
 
     /**
@@ -440,6 +448,24 @@ public class DataSourceParseHelper {
                 int length = objectList.text().length();
                 String contactTitleTagText = objectList.text().substring(0, (int)(length/2));
                 contact.setTitle(TextInputOutputUtils.safeTextContent(contactTitleTagText));
+            } else if (i == 12) {  // 房源基本情况（装修、楼层、朝向）
+                String basicInfosText = objectList.text();
+                String infosText = basicInfosText.replace(WebPageDataSourceEnum.TEXT_WILL_BE_REMOVED_A.toString(), "")
+                        .replace(WebPageDataSourceEnum.TEXT_WILL_BE_REMOVED_B.toString(), "");
+                System.out.println(infosText);
+                LinkedHashMap<String, String> hashMap = buildResidenceTypeBasicInfoTags(infosText);
+                houseDetail.updateResidentBasicInfoFromMapData(hashMap);
+            } else if (i == 13) {  // 房源内基础设施情况 (家电配套)
+                Element objElement = objectList.first();
+                LinkedHashMap<String, String> map = buildResidenceTypeFacilitiesInfoTags(objElement);
+                houseDetail.updateResidentFacilitiesInfoFromMapData(map);
+            } else if (i == 14) {  // 房源描述文案text
+                Element objElement = objectList.first();
+                if (contact.getTitle().length() > 0) {
+                    String descriptions = objElement.text().replace(WebPageDataSourceEnum.TEXT_WILL_BE_REMOVED_C.toString(), "")
+                            .replace(contact.getTitle(), "");
+                    houseDetail.setHouseDescription(descriptions);
+                }
             } else {
                 /**  Do nothing: in case of new itemTags in future
                  *     if (i == 4)  starterPrice
@@ -497,5 +523,76 @@ public class DataSourceParseHelper {
         return result;
     }
 
+
+    /**
+     * 构造Map数据结构： 处理BasicInfoTags: 将字符串文本类型 转化为map
+     * Before--> 发布：4天前 入住：随时入住 租期：6~12个月 看房：随时可看 楼层：3/32层 电梯：有 车位：租用车位 用水：商水 用电：商电 燃气：有 采暖：集中供暖
+     * After--> {发布:4天前, 入住:随时入住, 租期:6~12个月, 看房:随时可看, 楼层:3/32层, 电梯:有, 车位:租用车位, 用水:商水, 用电:商电, 燃气:有, 采暖:集中供暖}
+     * @param inputText 字符串文本
+     * @return HashMap<String, String> map
+     */
+    private LinkedHashMap<String, String> buildResidenceTypeBasicInfoTags(String inputText) {
+        if (inputText.isEmpty())    return new LinkedHashMap<>();
+
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        String[] itemList = inputText.split(" ");
+        String[] filterList = TextInputOutputUtils.removeEmptyElementFromStringArray(itemList);
+        if (filterList.length == 0)    return new LinkedHashMap<>();
+
+        for (int i = 0; i < filterList.length; i++) {
+            String item = filterList[i];
+            String keyName = residenceTypeBasicInfoTags[i];
+            if (item.contains(keyName)) {
+                String finalKey = keyName.replace("：", "");
+                String value = item.replace(keyName, "");
+                map.put(finalKey, value);
+            }
+        }
+        return map;
+    }
+
+
+    /**
+     * 处理住宅详情页面 基础设施标签显示状态的集合 转化为map
+     * @param element HTML对应元素
+     * @return {"电视"：1, "冰箱"：1, "洗衣机"：1, "空调"：0, "热水器"：0, "床"：0, "暖气"：1, "宽带"：1, "衣柜"：0, "天然气"：1} 的值
+     */
+    private LinkedHashMap<String, String> buildResidenceTypeFacilitiesInfoTags(Element element) {
+        if (element == null)    return new LinkedHashMap<>();
+
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        String[] keysList = residenceTypeFacilitiesHtmlTags();
+        Random random = new Random();
+        for (int index = 0; index < keysList.length; index++) {
+            String tagKey = keysList[index];
+            String finalKey = residenceTypeFacilityInfoTags[index];
+            // String result = (element.select(tagKey).isEmpty()) ? "1" : "2";
+            // map.put(finalKey, result);
+            // TODO: 将数据人为的变更为随机出现， 解决完获取js动态数据后再修改此处
+            int tmp = random.nextInt(2) + 1;
+            map.put(finalKey, tmp + "");
+        }
+        return map;
+    }
+
+
+    /**
+     * 二级页面 住宅类型的配套设备标签
+     * @return 住宅类型的配套设备标签的字符串数组
+     */
+    private String[] residenceTypeFacilitiesHtmlTags() {
+        return new String[] {
+                WebPageDataSourceEnum.TELEVISION_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.REFRIGERATOR_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.WASHING_MACHINE_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.AIR_CONDITIONER_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.WATER_HEATER_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.BED_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.HEATING_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.WIFI_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.WARDROBE_HIDDEN_TAG.toString(),
+                WebPageDataSourceEnum.GAS_HIDDEN_TAG.toString()
+        };
+    }
 
 }

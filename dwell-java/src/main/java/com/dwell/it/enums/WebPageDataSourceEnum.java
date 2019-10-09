@@ -53,6 +53,23 @@ public enum WebPageDataSourceEnum {
     ITEM_2ND_OPERATOR_TAG(".content__aside__list--subtitle"),                       // 运营商标签
     ITEM_2ND_TEL_NUMBER_TAG(".content__aside__list--bottom"),                       // 联系电话
 
+    // 需要删除掉的多余文本 (详情页面的描述【文本标题】)
+    TEXT_WILL_BE_REMOVED_A("房屋信息"),
+    TEXT_WILL_BE_REMOVED_B("基本信息"),
+    TEXT_WILL_BE_REMOVED_C("房源描述"),
+
+    // 详情页面中的家具设备tag
+    TELEVISION_HIDDEN_TAG(".fl.oneline.television_no"),
+    REFRIGERATOR_HIDDEN_TAG(".fl.online.refrigerator_no"),
+    WASHING_MACHINE_HIDDEN_TAG(".fl.online.washing_machine_no"),
+    AIR_CONDITIONER_HIDDEN_TAG(".fl.oneline.air_conditioner_no"),
+    WATER_HEATER_HIDDEN_TAG(".fl.oneline.water_heater_no"),
+    BED_HIDDEN_TAG(".fl.oneline.bed_no"),
+    HEATING_HIDDEN_TAG(".fl.oneline.heating_no"),
+    WIFI_HIDDEN_TAG(".fl.oneline.wifi_no"),
+    WARDROBE_HIDDEN_TAG(".fl.oneline.wardrobe_no"),
+    GAS_HIDDEN_TAG(".fl.oneline.natural_gas_no"),
+
     ;
 
 

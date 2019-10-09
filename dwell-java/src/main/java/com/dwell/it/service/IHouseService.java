@@ -33,4 +33,8 @@ public interface IHouseService {
     boolean batchUpdateLocationGeoList(List<House> list);  // Batch Update after fetch coordinates in Amap-SDK
 
 
+    // Excel
+    List<House> makeHouseAddressShorter(List<House> houseList);
+
+
 }

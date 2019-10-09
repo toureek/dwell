@@ -42,4 +42,11 @@ dependencies {
 	//	MyBatis ORM-Framework
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.1'
 	compile("tk.mybatis:mapper-spring-boot-starter:1.2.4")
+
+	//  MyBatis Paging
+	compile("com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5")
+
+	//  Excel
+	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+
 }

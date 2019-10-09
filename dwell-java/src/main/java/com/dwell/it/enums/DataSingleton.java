@@ -8,6 +8,7 @@ public enum DataSingleton {
 
     private boolean isFetchingServiceRunning;
     private boolean isDatasourceFetched;
+    private boolean shouldExportingExcel;
 
     private List<String> requestURLsList;
 
@@ -26,6 +27,14 @@ public enum DataSingleton {
 
     public void setDatasourceFetched(boolean datasourceFetched) {
         isDatasourceFetched = datasourceFetched;
+    }
+
+    public boolean isShouldExportingExcel() {
+        return shouldExportingExcel;
+    }
+
+    public void setShouldExportingExcel(boolean shouldExportingExcel) {
+        this.shouldExportingExcel = shouldExportingExcel;
     }
 
     public List<String> getRequestURLsList() {

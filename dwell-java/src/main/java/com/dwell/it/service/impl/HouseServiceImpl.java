@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -177,8 +178,6 @@ public class HouseServiceImpl implements IHouseService {
     }
 
 
-
-
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public boolean batchUpdateLocationGeoList(List<House> list) {
@@ -193,6 +192,22 @@ public class HouseServiceImpl implements IHouseService {
         } catch (DBManipulateException ex) {
             throw new DBManipulateException(String.format("本次批处理修改GEO数据失败: %s", ex.getMessage()));
         }
+    }
+
+
+    /**
+     * 简化地址信息 只保留小区名称
+     *
+     * @param houseList 需要处理的数据
+     * @return 简化后的数据
+     */
+    public List<House> makeHouseAddressShorter(List<House> houseList) {
+        List<House> resultList = new ArrayList<>(houseList.size());
+        for (House house : houseList) {
+            house.updateAddressNameShorter();
+            resultList.add(house);
+        }
+        return resultList;
     }
 
 }

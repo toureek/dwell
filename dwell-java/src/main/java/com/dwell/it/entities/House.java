@@ -87,4 +87,17 @@ public class House {
         this.geoInfo = geoInfo;
     }
 
+
+    /**
+     * 将数据库中的地址简化： 未央-经开-雅荷春天 精简为 雅荷春天
+     *
+     * @return 简化后的地址：小区名称
+     */
+    public void updateAddressNameShorter() {
+        if (this.cityZone != null && this.cityZone.length() > 0) {
+            String[] arrays = this.cityZone.trim().split("-");
+            String shortAddress = arrays[arrays.length - 1];
+            this.cityZone = shortAddress;
+        }
+    }
 }

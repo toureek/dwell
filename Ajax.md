@@ -1,4 +1,4 @@
-## Construct the Ajax-Request for dynamic-content on Web-Page.  
+## Construct the Ajax-Request for dynamic-rendered content on Web-Page.  
 
 &nbsp;&nbsp;&nbsp;&nbsp;Some target content were rendered by JavaScript, so I have to using Ajax to fetch the target with the extra effort.  
 &nbsp;&nbsp;&nbsp;&nbsp;For instance, the telephone-number is not repsonsed by server-side directly, let's Ajax it by ourselves.  

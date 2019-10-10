@@ -78,13 +78,15 @@ public class CrawlerController {
     }
 
 
-    /** 创建excel 用于高德地图 数据可视化方案
+    /**
+     * 创建excel 用于高德地图 数据可视化方案
+     *
      * @return Json-Response
      */
     @RequestMapping(value = "/excel", method = RequestMethod.GET)
     public HttpJSONResponse exportExcelFileWithinDataSource() {
         if (!DataSingleton.INSTANCE.isShouldExportingExcel()) {
-            return HttpJSONResponse.ok("请先调用/fetch/gpsinfo接口 为导出EXCEL数据做准备");
+            return HttpJSONResponse.ok("请先调用/fetch/coordinates 为导出EXCEL数据做准备");
         }
 
         List<House> houseList = iHouseService.queryQualifiedAddressHouseListWithinGeoInfo();

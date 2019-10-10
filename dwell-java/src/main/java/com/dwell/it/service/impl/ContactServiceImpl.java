@@ -15,7 +15,7 @@ public class ContactServiceImpl implements IContactService {
 
 
     @Autowired
-    private IContactDao iContactDao;  //TODO: ProviderService Text-String Hardcode-Format
+    private IContactDao iContactDao;
 
 
     @Transactional(propagation = Propagation.REQUIRED)

@@ -71,7 +71,7 @@ public class DataSourceParseHelper {
         }
 
         if (urlPath.startsWith(WebPageDataSourceEnum.RESIDENCE_2ND_CLASS_PAGE_PREFIX.toString())) {
-            constructSecondClassPageDataAndSaveToDatabase(elementsList, urlPath);
+            constructSecondClassPageDataAndSaveToDatabase(elementsList, urlPath);  // 先只处理整组房源，暂不统计公寓
         } else {
             constructFirstClassPageData(elementsList);
             try {

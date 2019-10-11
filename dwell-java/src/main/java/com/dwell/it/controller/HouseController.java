@@ -36,7 +36,7 @@ public class HouseController {
      * @param pageSize   分页大小
      * @return API-Response
      */
-    @RequestMapping(value = "/houses", method = RequestMethod.GET)
+    @RequestMapping(value = "/houses/list", method = RequestMethod.GET)
     public HttpJSONResponse fetchHouseListBaseOnPageNumber(@RequestParam(value = "pageNumber") Integer pageNumber,
                                                            @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize)
             throws JsonProcessingException {
